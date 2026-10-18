@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Einkaufsliste Kesslerplatz</title>
+<style>
+  :root {
+    --bg: #f5f1e9;
+    --paper: #fffdf8;
+    --ink: #26221e;
+    --muted: #6d655b;
+    --line: #e2d9ca;
+    --oak: #c9a77c;
+    --oak-soft: #efe3d1;
+    --clay: #a8603b;
+    --clay-soft: #f3e1d6;
+    --moss: #4c5a2f;
+    --moss-soft: #e4e8d6;
+    --black: #1d1b19;
+    --warn: #9a5b00;
+    --warn-soft: #fbedd3;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1a17; --paper: #24211d; --ink: #eee7dc; --muted: #a99f92; --line: #3a352e;
+      --oak: #c9a77c; --oak-soft: #3a3127; --clay: #d98a62; --clay-soft: #3d2a20;
+      --moss: #a9b986; --moss-soft: #2c3222; --black: #eee7dc; --warn: #e8b35a; --warn-soft: #3a2e1a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 30px; line-height: 1.15; margin: 0 0 6px; letter-spacing: -0.01em; }
+  h2 { font-size: 21px; margin: 44px 0 12px; letter-spacing: -0.01em; }
+  h3 { font-size: 16px; margin: 0 0 8px; }
+  p { margin: 0 0 10px; }
+  a { color: var(--clay); }
+  small, .muted { color: var(--muted); }
+  .sub { color: var(--muted); margin-bottom: 22px; }
+  .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 18px 0 8px; }
+  .kpi { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+  .kpi .label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .kpi .value { font-size: 26px; font-weight: 650; margin-top: 2px; }
+  .kpi .hint { font-size: 13px; color: var(--muted); }
+  .bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; margin-top: 8px; }
+  .bar > span { display: block; height: 100%; background: var(--moss); border-radius: 99px; transition: width .25s; }
+  .bar.over > span { background: var(--clay); }
+
+  .note { background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 6px; padding: 12px 14px; margin: 14px 0; }
+  .note ul { margin: 6px 0 0; padding-left: 18px; }
+  .note li { margin: 3px 0; }
+
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; }
+  .cat-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; margin-bottom: 12px; }
+  .cat-head h3 { font-size: 18px; margin: 0; }
+  .pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 99px; }
+  .pill.ikea { background: var(--moss-soft); color: var(--moss); }
+  .pill.gal { background: var(--clay-soft); color: var(--clay); }
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 760px) { .opts { grid-template-columns: 1fr; } }
+  .opt { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; position: relative; cursor: pointer; }
+  .opt.rec { border-color: var(--moss); box-shadow: inset 0 0 0 1px var(--moss); }
+  .opt.sel { background: var(--oak-soft); }
+  .opt input { position: absolute; top: 14px; right: 14px; accent-color: var(--moss); width: 18px; height: 18px; }
+  .opt .shop { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .opt .name { font-weight: 600; margin: 2px 28px 6px 0; }
+  .opt .price { font-size: 20px; font-weight: 650; }
+  .opt dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 8px 0 0; font-size: 13.5px; }
+  .opt dt { color: var(--muted); }
+  .opt dd { margin: 0; }
+  .why { margin-top: 12px; font-size: 14.5px; }
+  .why b { color: var(--moss); }
+  .alt { margin-top: 6px; font-size: 13.5px; color: var(--muted); }
+  .skip { margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .skip label { cursor: pointer; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  td.r, th.r { text-align: right; }
+  tfoot td { font-weight: 650; border-bottom: none; border-top: 2px solid var(--ink); }
+  .table-scroll { overflow-x: auto; }
+
+  .bed-grid { display: grid; grid-template-columns: minmax(260px, 380px) 1fr; gap: 22px; align-items: start; }
+  @media (max-width: 760px) { .bed-grid { grid-template-columns: 1fr; } }
+  svg text { font-family: inherit; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; margin-right: 5px; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+  .check { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); align-items: flex-start; }
+  .check:last-child { border-bottom: none; }
+  .check input { margin-top: 4px; accent-color: var(--moss); }
+  .check .grow { flex: 1; }
+  ol.timeline { padding-left: 20px; margin: 0; }
+  ol.timeline li { margin: 6px 0; }
+  .sources { font-size: 13px; columns: 2 320px; column-gap: 28px; }
+  .sources li { break-inside: avoid; margin: 3px 0; }
+  footer { margin-top: 40px; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Einkaufsliste Kesslerplatz</h1>
+  <p class="sub">2.5 Zimmer · 58 m² · Badenerstrasse 55c, Schlieren (Wohnung 03.0406, 4. OG) · Schlüssel ab 12.11.2026, Einzug 20.11.2026 · Preisstand recherchiert am 18.10.2026</p>
+</header>
+
+<div class="kpis">
+  <div class="kpi">
+    <div class="label">Deine Auswahl (ohne Couch)</div>
+    <div class="value num" id="kpi-total">–</div>
+    <div class="bar" id="kpi-bar"><span></span></div>
+    <div class="hint" id="kpi-budget">Budget CHF 1'500</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Variante IKEA (Empfehlung)</div>
+    <div class="value num" id="kpi-ikea">–</div>
+    <div class="hint">alle Kategorien IKEA, ohne Optionales</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Variante Galaxus</div>
+    <div class="value num" id="kpi-gal">–</div>
+    <div class="hint">alle Kategorien Galaxus, ohne Optionales</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Geschätzter Rückfluss beim Verkauf</div>
+    <div class="value num" id="kpi-resale">–</div>
+    <div class="hint" id="kpi-net">für deine aktuelle Auswahl</div>
+  </div>
+</div>
+
+<div class="note">
+  <strong>Wie verlässlich die Zahlen sind</strong>
+  <ul>
+    <li><b>Preise:</b> ikea.com und galaxus.ch konnte ich nicht direkt öffnen (vom Netzwerk dieser Umgebung gesperrt). Alle Preise stammen deshalb aus dem Suchindex der Produktseiten, Stand Mitte Oktober 2026. Wo ich unterschiedliche Preise gesehen habe, steht die Spanne dabei. Vor dem Kauf kurz auf dem Link prüfen.</li>
+    <li><b>Filialbestand:</b> Den Live-Bestand in Spreitenbach/Dietlikon konnte ich nicht abfragen. Alle IKEA-Empfehlungen sind Standardsortiment, das in beiden Filialen normalerweise zum Mitnehmen bereitsteht. Auf der Produktseite unter «Im Einrichtungshaus prüfen» die Filiale wählen.</li>
+    <li><b>Dietikon oder Dietlikon?</b> In Dietikon gibt es kein IKEA-Einrichtungshaus. Gemeint ist wohl <b>Dietlikon</b> (bei Zürich-Nord, ca. 25 Min. ab Schlieren). <b>Spreitenbach</b> ist mit ca. 10 Min. deutlich näher.</li>
+    <li><b>IKEA Family</b> (gratis) senkt die Lieferkosten um CHF 10 und bringt ab und zu Mitgliederpreise. Diese Preise sind hier nicht eingerechnet.</li>
+  </ul>
+</div>
+
+<h2>Passt ein 160er-Bett ins Schlafzimmer?</h2>
+<div class="card">
+  <div class="bed-grid">
+    <svg viewBox="-40 -40 455 500" role="img" aria-label="Schlafzimmer im Massstab mit Bett 160x200 an der Südwand">
+      <!-- Raum 375 x 409 cm, Norden oben -->
+      <rect x="-12" y="-12" width="399" height="433" fill="none" stroke="currentColor" stroke-width="12" opacity=".85"/>
+      <rect x="0" y="0" width="375" height="409" fill="var(--paper)" stroke="none"/>
+      <!-- Fenster Westwand -->
+      <rect x="-14" y="108" width="16" height="149" fill="var(--bg)" stroke="var(--muted)" stroke-width="1.5"/>
+      <text x="-30" y="190" font-size="12" fill="var(--muted)" transform="rotate(-90 -30 190)" text-anchor="middle">Fenster</text>
+      <!-- Tür Nordwand mit Schwenkbereich -->
+      <rect x="237" y="-14" width="81" height="16" fill="var(--paper)"/>
+      <path d="M318 0 L318 81 A81 81 0 0 1 237 0" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <line x1="318" y1="0" x2="318" y2="81" stroke="var(--warn)" stroke-width="3"/>
+      <text x="277" y="-20" font-size="12" text-anchor="middle" fill="var(--muted)">Tür 80</text>
+      <!-- Kommode MALM 80x48 -->
+      <rect x="30" y="2" width="80" height="48" fill="var(--oak)" opacity=".75" stroke="var(--ink)" stroke-width="1"/>
+      <text x="70" y="30" font-size="11" text-anchor="middle" fill="var(--ink)">Kommode</text>
+      <!-- Bett MALM 160 aussen 176 x 209 -->
+      <rect x="100" y="200" width="176" height="209" fill="var(--oak)" stroke="var(--ink)" stroke-width="1.5"/>
+      <rect x="108" y="212" width="160" height="190" fill="#f4efe6" stroke="var(--ink)" stroke-width=".8"/>
+      <rect x="118" y="370" width="64" height="26" rx="6" fill="#e6ddcf" stroke="var(--ink)" stroke-width=".6"/>
+      <rect x="194" y="370" width="64" height="26" rx="6" fill="#e6ddcf" stroke="var(--ink)" stroke-width=".6"/>
+      <!-- Vergleich 140er gestrichelt -->
+      <rect x="108" y="200" width="156" height="209" fill="none" stroke="var(--clay)" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <text x="188" y="300" font-size="13" text-anchor="middle" fill="var(--ink)" font-weight="600">MALM 160×200</text>
+      <text x="188" y="317" font-size="11" text-anchor="middle" fill="var(--ink)">aussen 176×209</text>
+      <!-- Nachttische 40x48 -->
+      <rect x="56" y="361" width="40" height="48" fill="var(--oak)" opacity=".75" stroke="var(--ink)" stroke-width="1"/>
+      <rect x="280" y="361" width="40" height="48" fill="var(--oak)" opacity=".75" stroke="var(--ink)" stroke-width="1"/>
+      <!-- Masslinien -->
+      <g stroke="var(--moss)" stroke-width="1.5" fill="var(--moss)" font-size="12">
+        <line x1="0" y1="250" x2="100" y2="250"/><text x="50" y="244" text-anchor="middle" stroke="none">100</text>
+        <line x1="276" y1="250" x2="375" y2="250"/><text x="325" y="244" text-anchor="middle" stroke="none">99</text>
+        <line x1="188" y1="81" x2="188" y2="200"/><text x="194" y="145" stroke="none">119 frei</text>
+      </g>
+      <g fill="var(--muted)" font-size="12">
+        <text x="187" y="438" text-anchor="middle">3.75 m</text>
+        <text x="400" y="205" text-anchor="middle" transform="rotate(90 400 205)">4.09 m</text>
+      </g>
+    </svg>
+    <div>
+      <p><b>Ergebnis: Ein 160er-Bett passt gut.</b> Ich habe das Schlafzimmer aus dem Grundriss (Massstab 1:100) vermessen: innen ca. <b>3.75 m × 4.09 m</b>, das ergibt 15.3 m². Im Plan stehen 15.5 m², das passt also.</p>
+      <p>Mit Kopfteil an der Südwand (gegenüber der Tür) bleiben neben einem MALM 160 (aussen 176 cm) <b>auf beiden Seiten ca. 100 cm</b>. Zwischen Fussende und Türschwenkbereich bleiben ca. 120 cm. Die Tür schlägt also frei auf, und die Kommode passt an die Nordwand links neben die Tür.</p>
+      <p>Ein 140er (gestrichelt) würde je ca. 8 cm mehr Platz pro Seite lassen. Das bringt hier wenig. Gebrauchte 160er-Betten und 160er-Matratzen verkaufen sich auf Tutti ausserdem etwas besser, weil Paare sie suchen.</p>
+      <p class="muted">Offene Frage für Aufgabe 2: Im Grundriss ist im Zimmer <b>kein Einbauschrank eingezeichnet</b>, nur in der Küche und im Reduit (X-Symbol). Falls an einer Wand ein Schrank von ca. 60 cm Tiefe steht, bleiben immer noch ≥ 70 cm neben dem Bett. Das 160er passt also auch dann.</p>
+      <div class="legend">
+        <span><span class="sw" style="background:var(--oak)"></span>Möbel (MALM)</span>
+        <span><span class="sw" style="background:var(--warn-soft);border:1px dashed var(--warn)"></span>Türschwenkbereich</span>
+        <span><span class="sw" style="border:1.5px dashed var(--clay)"></span>Vergleich 140er</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2>Vergleich pro Kategorie</h2>
+<p class="muted">Pro Kategorie die beste IKEA-Option gegen die Galaxus-Option. Der grüne Rahmen markiert meine Empfehlung. Wenn du eine Option anklickst, rechnet die Summe oben mit. Deine Auswahl bleibt in diesem Browser gespeichert.</p>
+<div id="cats"></div>
+
+<h2>Couch (Referenz, nicht im Budget)</h2>
+<div class="card">
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th>Modell (IKEA neu)</th><th>Bezug</th><th>Masse B × T × H</th><th class="r">Preis</th><th>Einschätzung</th></tr></thead>
+    <tbody>
+      <tr><td><a href="https://www.ikea.com/ch/de/p/soederhamn-3er-sofa-fridtuna-hellbeige-s89449690/">SÖDERHAMN 3er-Sofa</a></td><td>Fridtuna hellbeige</td><td class="num">198 × 99 × 83 cm</td><td class="r num">CHF 699.00</td><td>Passt am besten zum Stil: niedrig und modular. Der Bezug ist abnehmbar und waschbar.</td></tr>
+      <tr><td><a href="https://www.ikea.com/ch/de/p/soederhamn-3er-sofa-blekinge-weiss-s29501761/">SÖDERHAMN 3er-Sofa</a></td><td>Blekinge weiss</td><td class="num">198 × 99 × 83 cm</td><td class="r num">CHF 599.00</td><td>Günstigster SÖDERHAMN-Bezug. Weiss ist allerdings heikel.</td></tr>
+      <tr><td><a href="https://www.ikea.com/ch/de/p/kivik-3er-sofa-tresund-hellbeige-s89482830/">KIVIK 3er-Sofa</a></td><td>Tresund hellbeige</td><td class="num">228 × 95 × 83 cm</td><td class="r num">CHF 599.00 <small>(statt 699)</small></td><td>Tiefer und bequemer. Mit 2.28 m aber recht lang für die Wohnecke.</td></tr>
+      <tr><td><a href="https://www.ikea.com/ch/de/p/linanaes-3er-sofa-vissle-beige-10512236/">LINANÄS 3er-Sofa</a></td><td>Vissle beige</td><td class="num">183 cm breit</td><td class="r num">CHF 349.00</td><td>Budget-Referenz. Kompakt, aber spürbar weniger Komfort.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="two" style="margin-top:14px">
+    <div>
+      <h3>Gebraucht auf Ricardo/Tutti</h3>
+      <p>SÖDERHAMN und KIVIK werden laufend im Raum Zürich angeboten. Nach meiner Erfahrung (nicht live geprüft) zahlt man für einen 3er in gutem Zustand meist <b>CHF 150–400</b>, oft mit Abholung. Fixe Teile sind ein Vorteil: Bezüge sind einzeln nachkaufbar (KIVIK-Bezug ab ca. CHF 199). Ein abgewetzter Bezug ist also kein K.-o.-Kriterium.</p>
+      <p><a href="https://www.ricardo.ch/de/s/s%C3%B6derhamn/">Ricardo: «Söderhamn»</a> · <a href="https://www.ricardo.ch/de/s/kivik/">Ricardo: «Kivik»</a> · <a href="https://www.tutti.ch/">Tutti</a> (Suchbegriff «Söderhamn», Region Zürich)</p>
+    </div>
+    <div>
+      <h3>Achtung Aktion</h3>
+      <p>IKEA liefert ausgewählte Sofas noch <b>bis 01.11.2026 gratis</b> (Standardlieferung). Falls du doch neu kaufst: vor dem 1.11. bestellen und einen Liefertermin <b>ab 12.11.</b> wählen, wenn der Checkout das erlaubt. Sonst kostet die Lieferung CHF 109.95–129.95. <a href="https://www.ikea.com/ch/de/rooms/living-room/lieferung-inbegriffen-auf-ausgewaehlte-sofas-pubae9bce21/">Aktionsseite</a></p>
+    </div>
+  </div>
+</div>
+
+<h2>Optional: Lampen, Vorhänge, Kleinkram</h2>
+<div class="card">
+  <p class="muted">Alles IKEA, damit du es beim gleichen Einkauf mitnehmen kannst. Was du anhakst, zählt oben zur Summe.</p>
+  <div id="extras"></div>
+</div>
+
+<h2>Wiederverkauf: ehrliche Einschätzung</h2>
+<div class="card">
+  <p>Nach 1.5–2 Jahren auf Tutti/Ricardo oder an Nachmieter. Die Werte sind meine Schätzung aus typischen Inseraten im Raum Zürich, keine Garantie.</p>
+  <div class="table-scroll"><table id="resale"></table></div>
+  <div class="two" style="margin-top:14px">
+    <div>
+      <h3>Was sich gut verkauft</h3>
+      <p><b>IKEA-Klassiker</b> wie MALM, BORGEBY, TÄRNÖ und SÖDERHAMN: Käufer kennen die Masse und die Qualität. Man findet sie über den Namen, und Ersatzteile gibt es bei IKEA gratis. Realistisch sind <b>30–50 % vom Neupreis</b>, bei Sofas in gutem Zustand eher mehr.</p>
+      <p>Am einfachsten verkaufst du ein <b>Paket an die Nachmieter</b> («Schlafzimmer komplett, aufgebaut»). Du sparst dir Abbau und Termine, und der Preis ist oft höher als bei Einzelverkauf.</p>
+    </div>
+    <div>
+      <h3>Was sich schlecht verkauft</h3>
+      <p><b>No-Name-Ware von Galaxus</b> (vidaXL, Songmics, Vasagle, tectake) findet man über die Suche kaum. Die Spanplatten und Stoffschubladen überstehen den Ab- und Wiederaufbau schlecht. Realistisch sind 10–25 %, oft muss man sie verschenken.</p>
+      <p><b>Matratzen</b> verkaufen sich gebraucht praktisch nicht (Hygiene), höchstens zusammen mit dem Bett an die Nachmieter. Darum lohnt es sich hier nicht, beim Komfort zu sparen. Du schläfst 600 Nächte darauf.</p>
+    </div>
+  </div>
+</div>
+
+<h2>Logistik und Zeitplan</h2>
+<div class="card two">
+  <div>
+    <ol class="timeline">
+      <li><b>Jetzt bis 31.10.:</b> Gebrauchtes Sofa auf Ricardo/Tutti suchen. Falls du neu kaufst, die Gratis-Sofalieferung (bis 01.11.) nutzen.</li>
+      <li><b>Ab ca. 5.11.:</b> Galaxus-Artikel bestellen, falls du welche wählst. Galaxus liefert ohne fixes Datum, und vor dem 12.11. hast du keinen Schlüssel. Notfalls an die aktuelle Adresse liefern lassen.</li>
+      <li><b>12.11. (Schlüssel):</b> Mietwagen/Transporter, dann IKEA Spreitenbach, Mitnahme und Aufbau. Alternativ die IKEA-Lieferung auf den 12./13.11. terminieren.</li>
+      <li><b>12.–19.11.:</b> Aufbau. Nach Gefühl rechnest du 1.5 Tage für alles. Kommoden und Schuhschrank an der Wand befestigen (Kippschutz).</li>
+      <li><b>20.11.:</b> Einzug.</li>
+    </ol>
+  </div>
+  <div>
+    <h3>Abholen oder liefern lassen?</h3>
+    <p><b>Selbst abholen:</b> Die Empfehlung (ohne Sofa) passt in einen kleinen Transporter. Das längste Paket ist das MALM-Kopfteil mit gut 1.8 m. Ein Transporter für einen halben Tag kostet erfahrungsgemäss ca. CHF 80–130 (Mobility/Europcar, nicht geprüft).</p>
+    <p><b>IKEA-Standardlieferung</b> bis in die Wohnung: CHF 109.95 bis Warenwert 750, darüber CHF 129.95 (mit IKEA Family je CHF 10 weniger). Bordsteinlieferung ab CHF 69.95. <a href="https://www.ikea.com/ch/de/customer-service/services/delivery/">Lieferpreise IKEA</a></p>
+    <p class="muted">Die Liefer- bzw. Transportkosten sind in den Summen oben <b>nicht</b> enthalten.</p>
+  </div>
+</div>
+
+<h2>Quellen</h2>
+<ul class="sources" id="sources"></ul>
+
+<footer>Erstellt am 18.10.2026. Grundriss: Kesslerplatz, Wohnung 03.0406 (Circaangaben). Alle Preise in CHF inkl. MwSt. und ohne Gewähr.</footer>
+</div>
+
+<script>
+const CATS = [
+  {
+    id: 'schuh', name: 'Schuhschrank', where: 'Eingang/Flur', rec: 'ikea',
+    ikea: { name: 'BISSA Schuhschrank 2fach, Eichenachbildung', price: 29.95, dims: '49 × 28 × 93 cm',
+      url: 'https://www.ikea.com/ch/de/p/bissa-schuhschrank-2fach-eichenachbildung-70530218/',
+      avail: 'Standardsortiment, Mitnahme in Spreitenbach/Dietlikon (Bestand vor Ort prüfen)', resale: [10, 15] },
+    gal: { name: 'Vasagle Oklahoma Schuhregal, 5 Ebenen', price: 36.90, priceNote: 'gesehen CHF 29.00–47.50', dims: '75 × 28 × 93 cm',
+      url: 'https://www.galaxus.ch/de/search?q=Vasagle%20Oklahoma',
+      avail: 'Versand, Lieferzeit je nach Lager auf der Produktseite', resale: [5, 10] },
+    why: 'BISSA ist mit Klappen geschlossen. Das wirkt im kleinen Eingang ruhiger als ein offenes Regal, und die Eichenoptik passt zum Stil. Nur 28 cm tief, damit bleibt die Eingangstür frei. Platz für ca. 8 Paar.',
+    alt: 'Für mehr Schuhe: zweimal BISSA nebeneinander (CHF 59.90), oder HEMNES Schuhschrank 2fach 89 × 30 × 127 cm für CHF 169.00 (Massivholz, sehr gut wiederverkäuflich, aber teuer).'
+  },
+  {
+    id: 'bett', name: 'Bett 160 × 200', where: 'Schlafzimmer', rec: 'ikea',
+    ikea: { name: 'MALM Bettgestell hoch, Eichenfurnier weiss lasiert, 160×200', price: 259.00, priceNote: 'gesehen CHF 239–259', dims: '176 × 209 × 100 cm (Kopfteil), Fussteil 38 cm',
+      url: 'https://www.ikea.com/ch/de/p/malm-bettgestell-hoch-eichenfurnier-weiss-lasiert-s19022549/',
+      avail: 'Standardsortiment, Mitnahme (2 Pakete). Lattenrost separat', resale: [80, 130] },
+    gal: { name: 'vidaXL Legenborn Polsterbett 160×200, dunkelgrau', price: 147.01, priceNote: 'je nach Farbe CHF 146–172. Die 140er von deiner Merkliste kostet ca. CHF 123–131', dims: '165 × 218 × 74.5 cm',
+      url: 'https://www.galaxus.ch/en/s14/product/vidaxl-legenborn-160-x-200-cm-bed-43479803',
+      avail: '> 10 Stk. beim Drittanbieter vidaXL CH, ca. 1–2 Wochen. Bewertung 3.2/5 (6 Bewertungen)', resale: [30, 50] },
+    why: 'MALM in hellem Eichenfurnier ist der Inbegriff von «hell und skandinavisch» und auf Tutti der meistgesuchte Bettname. Das Legenborn ist gut CHF 110 günstiger. Es hat aber schwache Bewertungen (Seitenteile passen nicht exakt) und als Stoffbett von vidaXL kaum Wiederverkaufswert.',
+    alt: 'Spar-Tipp IKEA: SLATTUM Polsterbett 160×200 (164 × 206 cm, Kopfteil 85 cm) für CHF 169.00, <b>Lattenrost bereits integriert</b>. Damit entfällt LURÖY, und du sparst insgesamt CHF 130. Nachteil: grauer Stoff statt Holz. <a href="https://www.ikea.com/ch/en/p/slattum-upholstered-bed-frame-vissle-dark-grey-40571248/">SLATTUM ansehen</a>. Galaxus-Holzalternative: vidaXL Achim Kiefer massiv inkl. Lattenrost, ca. CHF 153 (<a href="https://www.galaxus.ch/de/s14/product/vidaxl-achim-160-x-200-cm-bett-41902560">Link</a>).'
+  },
+  {
+    id: 'matratze', name: 'Matratze + Lattenrost', where: 'Schlafzimmer', rec: 'ikea',
+    ikea: { name: 'VALEVÅG Taschenfederkernmatratze fest, 160×200 + LURÖY Federholzrahmen 160×200', price: 389.00, priceNote: 'Matratze CHF 349.00 + Lattenrost CHF 40.00 (Matratze zeitweise CHF 296–299 in Aktion)', dims: 'Matratze 160 × 200 × 24 cm, 5 Zonen. Lattenrost 2 × 80 × 200 cm',
+      url: 'https://www.ikea.com/ch/de/p/valevag-taschenfederkernmatratze-fest-hellblau-40450680/',
+      url2: 'https://www.ikea.com/ch/de/p/luroey-federholzrahmen-s39481357/',
+      avail: 'Matratze gerollt zum Mitnehmen. 90 Tage Umtausch, 10 Jahre Garantie. Auch als «mittelfest» erhältlich', resale: [10, 80] },
+    gal: { name: 'vidaXL Labelia Taschenfederkern 160×200 + Floki24 Rollrost 160×200', price: 330.00, priceNote: 'Matratze CHF 262–345 + Rollrost CHF 68.00', dims: 'Matratze 160 × 200 cm (Höhe auf Produktseite prüfen). Rollrost 160 × 200 cm',
+      url: 'https://www.galaxus.ch/de/search?q=vidaXL%20Labelia%20160',
+      url2: 'https://www.galaxus.ch/de/s14/product/floki24-lattenrost-140-x-200-cm-rolllattenrost-kiefer-massivholz-bett-rollrost-lattenrost-52962738',
+      avail: 'Versand. Härtegrad der Labelia nicht angegeben, kein Probeschlafen', resale: [0, 30] },
+    why: 'Hier lohnt IKEA trotz des höheren Preises. Bei VALEVÅG kannst du 90 Tage umtauschen. Wenn «fest» nicht passt, tauschst du in Spreitenbach. Bei Galaxus kaufst du blind. LURÖY für CHF 40 ist der einfache Standardrost für MALM.',
+    alt: 'Günstiger bei IKEA: VESTMARKA Federkernmatratze 160×200 für CHF 219.00 (weniger Zonen und Komfort). Kauf sie, wenn das Budget eng wird. Wichtig: Falls das Legenborn einen Lattenrost mitbringt, entfällt der Floki24-Rost (vor Bestellung prüfen).'
+  },
+  {
+    id: 'nacht', name: 'Nachttische (2 Stück)', where: 'Schlafzimmer', rec: 'ikea', qty: 2,
+    ikea: { name: 'MALM Kommode mit 2 Schubladen, Eichenfurnier weiss lasiert', price: 49.95, dims: '40 × 48 × 55 cm',
+      url: 'https://www.ikea.com/ch/de/cat/nachttische-beistelltische-20656/f/eiche-nachttische-und-beistelltische-f-appearance--50679/',
+      avail: 'Standardsortiment, Mitnahme. Zeitweise CHF 37.45 im Einrichtungshaus', resale: [20, 25] },
+    gal: { name: 'Skye Decor Caleb Nachttisch', price: 26.90, priceNote: 'Preis von deiner Merkliste. Das Produkt fand ich im Suchindex nicht', dims: '25 × 27 × 60 cm',
+      url: 'https://www.galaxus.ch/de/search?q=Skye%20Decor%20Caleb',
+      avail: 'Lieferzeit auf der Produktseite prüfen', resale: [5, 8] },
+    why: 'Die Nachttische passen zu MALM-Bett und -Kommode und werden auf Tutti als Set gesucht. Der Caleb ist mit 25 × 27 cm sehr klein: Wecker, Lampe und Handy passen kaum gleichzeitig darauf. Bei ca. 100 cm Platz neben dem Bett haben 40 cm breite Nachttische locker Platz.',
+    alt: 'Günstiger: KULLEN 2 Schubladen weiss, 35 × 40 × 49 cm, CHF 29.95 pro Stück (<a href="https://www.ikea.com/ch/de/p/kullen-kommode-mit-2-schubladen-weiss-80309241/">Link</a>). Oder nur ein Nachttisch, falls du allein schläfst.'
+  },
+  {
+    id: 'kommode', name: 'Kommode Schlafzimmer', where: 'Schlafzimmer', rec: 'ikea',
+    ikea: { name: 'MALM Kommode mit 3 Schubladen, Eichenfurnier weiss lasiert', price: 99.95, priceNote: 'zeitweise CHF 74.95 im Einrichtungshaus', dims: '80 × 48 × 78 cm',
+      url: 'https://www.ikea.com/ch/de/cat/kommoden-10451/f/beige-kommoden-f-colors--10003/',
+      avail: 'Standardsortiment, Mitnahme. Muss an der Wand befestigt werden', resale: [40, 55] },
+    gal: { name: 'Songmics Ingrid Kommode (7 Stoffschubladen, Stahlgestell)', price: 49.50, priceNote: 'gesehen CHF 46.50–51.90', dims: '98.8 × 30 × 73.7 cm',
+      url: 'https://www.galaxus.ch/de/search?q=Songmics%20Ingrid',
+      avail: 'Versand. Bewertung 4.5/5', resale: [10, 15] },
+    why: 'Die Kommode passt optisch zum Bett. Feste Schubladen auf Metallschienen halten auch Ab- und Aufbau aus. Die Ingrid ist eher ein Stoffboxen-Regal: günstig und leicht, aber sie sieht schnell billig aus und hat fast keinen Wiederverkaufswert.',
+    alt: 'Mehr Stauraum: KULLEN 6 Schubladen, 140 × 40 × 72 cm, ab CHF 125.00 (weiss).'
+  },
+  {
+    id: 'tv', name: 'Kleiner TV-Tisch', where: 'Wohnen', rec: 'ikea',
+    ikea: { name: 'LACK TV-Bank, weiss', price: 14.95, dims: '90 × 36 × 45 cm',
+      url: 'https://www.ikea.com/ch/de/p/lack-tv-bank-weiss-00625521/',
+      avail: 'Standardsortiment, Mitnahme. Trägt TV bis 10 kg', resale: [5, 10] },
+    gal: { name: 'Songmics/Vasagle Bianca TV-Möbel, weiss mit Holzbeinen', price: 64.00, priceNote: 'gesehen CHF 48.70–64.00', dims: '120 × 40 × 49.5 cm',
+      url: 'https://www.galaxus.ch/de/search?q=Songmics%20Bianca%20TV',
+      avail: 'Versand. Bewertung 4.7/5 (32 Bewertungen)', resale: [15, 25] },
+    why: 'Für einen kleinen TV-Tisch ist LACK für CHF 15 kaum zu schlagen. Du verlierst beim Verkauf praktisch nichts. Die Bianca sieht mit den Gummibaum-Beinen mehr nach Japandi aus und hat Stauraum. Das ist der einzige Fall, in dem Galaxus optisch klar vorne liegt. Wenn dir das CHF 50 wert ist, nimm sie.',
+    alt: 'IKEA mit Stauraum: BESTÅ TV-Bank weiss, 120 × 40 × 38 cm, CHF 70.00 (<a href="https://www.ikea.com/ch/de/p/besta-tv-bank-weiss-80294503/">Link</a>).'
+  },
+  {
+    id: 'couchtisch', name: 'Couchtisch', where: 'Wohnen', rec: 'ikea',
+    ikea: { name: 'BORGEBY Couchtisch, Birkenfurnier, Ø 70 cm', price: 129.00, dims: 'Ø 70 × 42 cm, mit Ablage',
+      url: 'https://www.ikea.com/ch/de/p/borgeby-couchtisch-birkenfurnier-70389356/',
+      avail: 'Standardsortiment, Mitnahme (1 flaches Paket, 9 kg)', resale: [50, 70] },
+    gal: { name: 'Vasagle Couchtisch rund mit 2 Ablagen', price: 101.00, dims: '80 × 80 × 45 cm',
+      url: 'https://www.galaxus.ch/de/s14/product/vasagle-couchtisch-80-x-80-x-45-cm-couchtisch-beistelltisch-67117474',
+      avail: 'Versand. Holzwerkstoff', resale: [20, 30] },
+    why: 'BORGEBY aus heller Birke mit runder Form ist sehr japandi und lässt den Laufweg zwischen Sofa und TV frei. Der LISABO 118 × 50 erscheint auf ikea.com/ch nicht mehr im Sortiment (nur noch in AT/DE). Deshalb habe ich ihn nicht genommen.',
+    alt: 'Günstiger: VITTSJÖ Couchtisch schwarzbraun/Glas Ø 75 cm, CHF 79.95. Das ist der schwarze Akzent, aber weniger warm (<a href="https://www.ikea.com/ch/de/p/vittsjoe-couchtisch-schwarzbraun-glas-80213309/">Link</a>). BORGEBY gibt es auch in schwarz zum gleichen Preis.'
+  },
+  {
+    id: 'balkon', name: 'Balkongarnitur', where: 'Balkon (ca. 1.9 × 3.6 m)', rec: 'ikea',
+    ikea: { name: 'TÄRNÖ Tisch + 2 Stühle, schwarz/hellbraun lasiert (Akazie massiv)', price: 69.95, dims: 'Tisch 55 × 54 × 70 cm, Stuhl 39 × 40 × 79 cm (klappbar)',
+      url: 'https://www.ikea.com/ch/de/p/taernoe-tisch-2-stuehle-aussen-schwarz-hellbraun-lasiert-s69898415/',
+      avail: 'Saisonartikel, im Oktober/November evtl. reduziertes Lager. Vorher prüfen', resale: [30, 45] },
+    gal: { name: 'tectake Palese Rattan-Lounge (Bank, 2 Sessel, Glastisch)', price: 130.90, priceNote: 'gesehen CHF 119.52–149.90', dims: 'Masse fehlen auf Galaxus (Datenfehler «1104 cm»). Vor Kauf prüfen',
+      url: 'https://www.galaxus.ch/de/s4/product/tectake-rattan-gartenset-palese-fuer-4-personen-gartenlounge-54773834',
+      avail: 'Versand. Bewertung 4.6–4.8/5', resale: [40, 60] },
+    why: 'Akazie mit schwarzem Stahl trifft deinen Stil genau, und klappbar heisst: im Winter weg. Auf ca. 1.9 m Balkontiefe braucht das Set nur ca. 1.3 × 1.3 m. Die Palese-Lounge wäre gemütlicher, aber Polyrattan mit Glastisch wirkt weniger Japandi und füllt den schmalen Balkon fast komplett.',
+    alt: 'Sitzkissen: TÄRNÖ-Set mit Kuddarna-Kissen CHF 84.95. Ich würde die Garnitur ehrlich gesagt erst im März kaufen, dann ist die Auswahl grösser und der Balkon wird überhaupt benutzt.'
+  }
+];
+
+const EXTRAS = [
+  { id: 'lamp-wohn', group: 'Deckenlampen', name: 'TAGGTOFS / HAVSDJUP Hängeleuchte Bambus, 67 cm (Wohnen)', price: 34.95, url: 'https://www.ikea.com/ch/de/cat/deckenbeleuchtung-18750/f/deckenbeleuchtung-aus-bambus-f-materials--47653/', def: true },
+  { id: 'lamp-ess', group: 'Deckenlampen', name: 'SINNERLIG Hängeleuchte Bambus, 27 cm (über dem Esstisch)', price: 29.95, url: 'https://www.ikea.com/ch/de/p/sinnerlig-haengeleuchte-bambus-handarbeit-00508536/', def: true },
+  { id: 'lamp-schlaf', group: 'Deckenlampen', name: 'RISBYN / HAVSDJUP Papierleuchte, 57 cm (Schlafzimmer)', price: 29.95, url: 'https://www.ikea.com/ch/de/cat/deckenbeleuchtung-18750/f/deckenbeleuchtung-aus-papier-f-materials--51376/', def: true },
+  { id: 'lamp-flur', group: 'Deckenlampen', name: 'GULLSUDARE / HAVSDJUP Papierleuchte, 45 cm (Flur/Reduit)', price: 9.95, url: 'https://www.ikea.com/ch/de/cat/deckenbeleuchtung-18750/f/deckenbeleuchtung-aus-papier-f-materials--51376/', def: true },
+  { id: 'bulbs', group: 'Deckenlampen', name: 'LED-Leuchtmittel E27 warmweiss, ca. 4 Stück (Schätzung)', price: 20.00, url: 'https://www.ikea.com/ch/de/cat/leuchtmittel-10744/', def: true },
+  { id: 'curt-schlaf', group: 'Vorhänge', name: 'MERETE Verdunklungsgardine beige, 2 Schals 145 × 300 cm (Schlafzimmer)', price: 59.95, url: 'https://www.ikea.com/ch/de/p/merete-verdunklungsgardine-2-schals-beige-90364703/', def: true },
+  { id: 'curt-wohn', group: 'Vorhänge', name: 'HILJA Gardinenpaar 145 × 300 cm, 2 Paar (Wohnen, Fensterfront ca. 3.1 m)', price: 49.90, url: 'https://www.ikea.com/ch/de/p/hilja-gardinenpaar-grau-90390735/', def: true },
+  { id: 'misc', group: 'Kleinkram', name: 'Wandbefestigung/Dübel, Filzgleiter, Gardinenhaken, Verlängerungskabel (Pauschale)', price: 60.00, url: '', def: true },
+  { id: 'rug', group: 'Aus deiner Galaxus-Merkliste', name: 'TT Home Teppich 200 × 140 (vor dem Sofa). Den 240 × 340 finde ich für die Wohnecke zu gross', price: 65.41, url: 'https://www.galaxus.ch/de/search?q=TT%20Home%20Teppich', def: false },
+  { id: 'floorlamp', group: 'Aus deiner Galaxus-Merkliste', name: 'Govee Uplighter Stehlampe', price: 112.00, url: 'https://www.galaxus.ch/de/search?q=Govee%20Uplighter', def: false },
+  { id: 'shelf', group: 'Aus deiner Galaxus-Merkliste', name: 'Casaria Standregal 26 × 60 × 130', price: 44.95, url: 'https://www.galaxus.ch/de/search?q=Casaria%20Standregal', def: false }
+];
+
+const SOURCES = [
+  ['MALM Bettgestell hoch Eichenfurnier 160×200 – IKEA CH', 'https://www.ikea.com/ch/de/p/malm-bettgestell-hoch-eichenfurnier-weiss-lasiert-s19022549/'],
+  ['MALM / LURÖY 160×200 (Masse) – IKEA CH', 'https://www.ikea.com/ch/de/p/malm-bettgestell-hoch-eichenfurnier-weiss-lasiert-luroey-s59027390/'],
+  ['SLATTUM 160×200 – IKEA CH', 'https://www.ikea.com/ch/en/p/slattum-upholstered-bed-frame-vissle-dark-grey-40571248/'],
+  ['VALEVÅG fest 160×200 – IKEA CH', 'https://www.ikea.com/ch/de/p/valevag-taschenfederkernmatratze-fest-hellblau-40450680/'],
+  ['LURÖY 160×200 – IKEA CH', 'https://www.ikea.com/ch/de/p/luroey-federholzrahmen-s39481357/'],
+  ['BISSA Eichenachbildung – IKEA CH', 'https://www.ikea.com/ch/de/p/bissa-schuhschrank-2fach-eichenachbildung-70530218/'],
+  ['HEMNES Flurserie – IKEA CH', 'https://www.ikea.com/ch/de/cat/hemnes-flurserie-58618/'],
+  ['Nachttische Eiche – IKEA CH', 'https://www.ikea.com/ch/de/cat/nachttische-beistelltische-20656/f/eiche-nachttische-und-beistelltische-f-appearance--50679/'],
+  ['KULLEN 2 Schubladen – IKEA CH', 'https://www.ikea.com/ch/de/p/kullen-kommode-mit-2-schubladen-weiss-80309241/'],
+  ['Beige Kommoden (MALM Eiche) – IKEA CH', 'https://www.ikea.com/ch/de/cat/kommoden-10451/f/beige-kommoden-f-colors--10003/'],
+  ['KULLEN 6 Schubladen – IKEA CH', 'https://www.ikea.com/ch/de/p/kullen-kommode-mit-6-schubladen-weiss-90309245/'],
+  ['LACK TV-Bank 90 – IKEA CH', 'https://www.ikea.com/ch/de/p/lack-tv-bank-weiss-00625521/'],
+  ['BESTÅ TV-Bank 120 – IKEA CH', 'https://www.ikea.com/ch/de/p/besta-tv-bank-weiss-80294503/'],
+  ['BORGEBY Birkenfurnier – IKEA CH', 'https://www.ikea.com/ch/de/p/borgeby-couchtisch-birkenfurnier-70389356/'],
+  ['VITTSJÖ Couchtisch – IKEA CH', 'https://www.ikea.com/ch/de/p/vittsjoe-couchtisch-schwarzbraun-glas-80213309/'],
+  ['LISABO Couchtisch (nur AT) – IKEA AT', 'https://www.ikea.com/at/de/p/lisabo-couchtisch-eschenfurnier-70297658/'],
+  ['TÄRNÖ Tisch + 2 Stühle – IKEA CH', 'https://www.ikea.com/ch/de/p/taernoe-tisch-2-stuehle-aussen-schwarz-hellbraun-lasiert-s69898415/'],
+  ['SÖDERHAMN 3er Fridtuna – IKEA CH', 'https://www.ikea.com/ch/de/p/soederhamn-3er-sofa-fridtuna-hellbeige-s89449690/'],
+  ['SÖDERHAMN Masse – IKEA DE', 'https://www.ikea.com/de/de/p/soederhamn-3er-sofa-fridtuna-dunkelgrau-s39449621/'],
+  ['KIVIK 3er Tresund – IKEA CH', 'https://www.ikea.com/ch/de/p/kivik-3er-sofa-tresund-hellbeige-s89482830/'],
+  ['LINANÄS 3er – IKEA CH', 'https://www.ikea.com/ch/de/p/linanaes-3er-sofa-vissle-beige-10512236/'],
+  ['Lieferservice – IKEA CH', 'https://www.ikea.com/ch/de/customer-service/services/delivery/'],
+  ['Gratis Sofalieferung – IKEA CH', 'https://www.ikea.com/ch/de/rooms/living-room/lieferung-inbegriffen-auf-ausgewaehlte-sofas-pubae9bce21/'],
+  ['Deckenleuchten Bambus – IKEA CH', 'https://www.ikea.com/ch/de/cat/deckenbeleuchtung-18750/f/deckenbeleuchtung-aus-bambus-f-materials--47653/'],
+  ['MERETE beige – IKEA CH', 'https://www.ikea.com/ch/de/p/merete-verdunklungsgardine-2-schals-beige-90364703/'],
+  ['vidaXL Legenborn 160 – Galaxus', 'https://www.galaxus.ch/en/s14/product/vidaxl-legenborn-160-x-200-cm-bed-43479803'],
+  ['vidaXL Legenborn 140 – Galaxus', 'https://www.galaxus.ch/en/s14/product/vidaxl-legenborn-140-x-200-cm-bed-43480100'],
+  ['vidaXL Achim 160 – Galaxus', 'https://www.galaxus.ch/de/s14/product/vidaxl-achim-160-x-200-cm-bett-41902560'],
+  ['vidaXL Matratzen – Galaxus', 'https://www.galaxus.ch/de/s14/producttype/toplist/brand/matratze-1241/vidaxl-83995'],
+  ['Floki24 Rollrost – Galaxus', 'https://www.galaxus.ch/de/s14/product/floki24-lattenrost-140-x-200-cm-rolllattenrost-kiefer-massivholz-bett-rollrost-lattenrost-52962738'],
+  ['Kommoden-Bestseller (Songmics Ingrid) – Galaxus', 'https://www.galaxus.ch/de/s14/producttype/toplist/relevance/kommode-sideboard-1562'],
+  ['TV-Möbel unter 100 CHF (Bianca) – Galaxus', 'https://www.galaxus.ch/de/s14/producttype/toplist/affordable/tv-moebel-518'],
+  ['Schuhschränke (Vasagle Oklahoma) – Galaxus', 'https://www.galaxus.ch/de/s14/producttype/toplist/relevance/schuhschrank-1577'],
+  ['Vasagle Couchtisch 80 – Galaxus', 'https://www.galaxus.ch/de/s14/product/vasagle-couchtisch-80-x-80-x-45-cm-couchtisch-beistelltisch-67117474'],
+  ['tectake Palese – Galaxus', 'https://www.galaxus.ch/de/s4/product/tectake-rattan-gartenset-palese-fuer-4-personen-gartenlounge-54773834']
+];
+
+const fmt = n => 'CHF ' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+const fmt0 = n => 'CHF ' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+const BUDGET = 1500;
+const KEY = 'kesslerplatz-einkauf-v1';
+
+let state = { pick: {}, extras: {} };
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.pick) state = s; } catch (e) {}
+CATS.forEach(c => { if (!state.pick[c.id]) state.pick[c.id] = c.rec; });
+EXTRAS.forEach(x => { if (state.extras[x.id] === undefined) state.extras[x.id] = x.def; });
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+
+const lineTotal = (c, o) => o.price * (c.qty || 1);
+
+function optHTML(c, key) {
+  const o = c[key];
+  const isRec = c.rec === key;
+  const links = `<a href="${o.url}" target="_blank" rel="noopener">Produktseite</a>` +
+    (o.url2 ? ` · <a href="${o.url2}" target="_blank" rel="noopener">2. Artikel</a>` : '');
+  return `<label class="opt ${isRec ? 'rec' : ''}" data-cat="${c.id}" data-key="${key}">
+    <input type="radio" name="pick-${c.id}" value="${key}">
+    <div class="shop">${key === 'ikea' ? 'IKEA' : 'Galaxus'}${isRec ? ' · <span class="pill ikea">Empfehlung</span>' : ''}</div>
+    <div class="name">${o.name}</div>
+    <div class="price num">${fmt(lineTotal(c, o))}${c.qty ? ` <small>(${c.qty} × ${fmt(o.price)})</small>` : ''}</div>
+    ${o.priceNote ? `<small>${o.priceNote}</small>` : ''}
+    <dl>
+      <dt>Masse</dt><dd>${o.dims}</dd>
+      <dt>Verfügbar</dt><dd>${o.avail}</dd>
+      <dt>Link</dt><dd>${links}</dd>
+    </dl>
+  </label>`;
+}
+
+document.getElementById('cats').innerHTML = CATS.map(c => `
+  <section class="card" id="cat-${c.id}">
+    <div class="cat-head"><h3>${c.name}</h3><span class="muted">${c.where}</span>
+      <span class="pill ${c.rec === 'ikea' ? 'ikea' : 'gal'}">Empfehlung: ${c.rec === 'ikea' ? 'IKEA' : 'Galaxus'}</span></div>
+    <div class="opts">${optHTML(c, 'ikea')}${optHTML(c, 'gal')}</div>
+    <div class="why"><b>Begründung:</b> ${c.why}</div>
+    <div class="alt">${c.alt}</div>
+    <div class="skip"><label><input type="radio" name="pick-${c.id}" value="none"> brauche ich nicht / habe ich schon</label></div>
+  </section>`).join('');
+
+const groups = [...new Set(EXTRAS.map(x => x.group))];
+document.getElementById('extras').innerHTML = groups.map(g => `
+  <h3 style="margin-top:12px">${g}</h3>
+  ${EXTRAS.filter(x => x.group === g).map(x => `
+    <label class="check"><input type="checkbox" data-extra="${x.id}">
+      <span class="grow">${x.url ? `<a href="${x.url}" target="_blank" rel="noopener">${x.name}</a>` : x.name}</span>
+      <span class="num">${fmt(x.price)}</span></label>`).join('')}`).join('') +
+  `<p class="muted" style="margin-top:10px">Vorher klären: Gibt es in der Wohnung schon <b>Vorhangschienen</b> an der Decke (bei Neubauten oft vorhanden) und Lampenbaldachine/Fassungen? Die HILJA-Gardinen gibt es auch in Weiss und Beige. Den Farbton vor Ort anschauen.</p>`;
+
+function render() {
+  document.querySelectorAll('input[type=radio][name^="pick-"]').forEach(r => {
+    const id = r.name.slice(5);
+    r.checked = state.pick[id] === r.value;
+  });
+  document.querySelectorAll('.opt').forEach(el => {
+    el.classList.toggle('sel', state.pick[el.dataset.cat] === el.dataset.key);
+  });
+  document.querySelectorAll('input[data-extra]').forEach(cb => { cb.checked = !!state.extras[cb.dataset.extra]; });
+
+  let total = 0, resLo = 0, resHi = 0;
+  CATS.forEach(c => {
+    const k = state.pick[c.id];
+    if (k === 'none') return;
+    const o = c[k];
+    total += lineTotal(c, o);
+    resLo += o.resale[0] * (c.qty || 1);
+    resHi += o.resale[1] * (c.qty || 1);
+  });
+  EXTRAS.forEach(x => { if (state.extras[x.id]) total += x.price; });
+
+  const ikea = CATS.reduce((s, c) => s + lineTotal(c, c.ikea), 0);
+  const gal = CATS.reduce((s, c) => s + lineTotal(c, c.gal), 0);
+
+  document.getElementById('kpi-total').textContent = fmt(total);
+  document.getElementById('kpi-ikea').textContent = fmt(ikea);
+  document.getElementById('kpi-gal').textContent = fmt(gal);
+  const bar = document.getElementById('kpi-bar');
+  bar.querySelector('span').style.width = Math.min(100, total / BUDGET * 100) + '%';
+  bar.classList.toggle('over', total > BUDGET);
+  document.getElementById('kpi-budget').textContent = total <= BUDGET
+    ? `${fmt(BUDGET - total)} unter Budget CHF 1'500 (ohne Transport)`
+    : `${fmt(total - BUDGET)} über Budget CHF 1'500`;
+  document.getElementById('kpi-resale').textContent = `${fmt0(resLo)}–${fmt0(resHi).replace('CHF ', '')}`;
+  const furnTotal = CATS.reduce((s, c) => state.pick[c.id] === 'none' ? s : s + lineTotal(c, c[state.pick[c.id]]), 0);
+  document.getElementById('kpi-net').textContent = `Netto-Kosten Möbel ca. ${fmt0(furnTotal - resHi)}–${fmt0(furnTotal - resLo).replace('CHF ', '')}`;
+
+  renderResale();
+}
+
+function renderResale() {
+  const sum = (key, i) => CATS.reduce((s, c) => s + c[key].resale[i] * (c.qty || 1), 0);
+  const tot = key => CATS.reduce((s, c) => s + lineTotal(c, c[key]), 0);
+  const row = c => {
+    const q = c.qty || 1;
+    const r = (o) => `${fmt0(o.resale[0] * q)}–${Math.round(o.resale[1] * q)}`;
+    return `<tr><td>${c.name}</td><td class="r num">${fmt(lineTotal(c, c.ikea))}</td><td class="r num">${r(c.ikea)}</td>
+      <td class="r num">${fmt(lineTotal(c, c.gal))}</td><td class="r num">${r(c.gal)}</td></tr>`;
+  };
+  const iL = sum('ikea', 0), iH = sum('ikea', 1), gL = sum('gal', 0), gH = sum('gal', 1);
+  const iT = tot('ikea'), gT = tot('gal');
+  document.getElementById('resale').innerHTML = `
+    <thead><tr><th>Kategorie</th><th class="r">IKEA neu</th><th class="r">IKEA Verkauf</th><th class="r">Galaxus neu</th><th class="r">Galaxus Verkauf</th></tr></thead>
+    <tbody>${CATS.map(row).join('')}</tbody>
+    <tfoot>
+      <tr><td>Summe</td><td class="r num">${fmt(iT)}</td><td class="r num">${fmt0(iL)}–${Math.round(iH)}</td><td class="r num">${fmt(gT)}</td><td class="r num">${fmt0(gL)}–${Math.round(gH)}</td></tr>
+      <tr><td>Netto nach 2 Jahren</td><td></td><td class="r num">${fmt0(iT - iH)}–${Math.round(iT - iL)}</td><td></td><td class="r num">${fmt0(gT - gH)}–${Math.round(gT - gL)}</td></tr>
+    </tfoot>`;
+}
+
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.name && t.name.startsWith('pick-')) { state.pick[t.name.slice(5)] = t.value; }
+  else if (t.dataset.extra) { state.extras[t.dataset.extra] = t.checked; }
+  else return;
+  save(); render();
+});
+
+document.getElementById('sources').innerHTML = SOURCES
+  .map(([t, u]) => `<li><a href="${u}" target="_blank" rel="noopener">${t}</a></li>`).join('');
+
+render();
+</script>
+</body>
+</html>
