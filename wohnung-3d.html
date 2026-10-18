@@ -221,6 +221,7 @@ const DOORS = [
 const KEEP_CLEAR = [
   { name: 'Balkon-Schiebetür (innen)', r: [2.31, 1.93, 2.91, 3.48] },
   { name: 'Balkon-Schiebetür (aussen)', r: [1.68, 1.93, 2.13, 3.48] },
+  { name: 'Dusche', r: [4.52, 8.72, 6.34, 9.65] },
 ];
 const RAILINGS = [[0, 1.53, 0.08, 5.03]];
 // Einbauten laut Plan
@@ -294,6 +295,10 @@ const CAT = {
     legs: 0.12, legMat: 'rubberwood', tv: true, access: 'any', url: 'https://www.galaxus.ch/de/search?q=Songmics%20Bianca%20TV' },
   vasagleRound: { name: 'Vasagle Couchtisch rund', shop: 'Galaxus', price: 101.00, w: 0.80, d: 0.80, h: 0.45, kind: 'roundTable', top: 'oak', legs: 'steel',
     type: 'table', url: 'https://www.galaxus.ch/de/s14/product/vasagle-couchtisch-80-x-80-x-45-cm-couchtisch-beistelltisch-67117474' },
+  ragrund: { name: 'RÅGRUND Regal Bambus', shop: 'IKEA', price: 49.95, w: 0.37, d: 0.37, h: 1.04, kind: 'shelf', mat: 'bamboo', shelves: 4,
+    clear: { front: [0.6, 0.7] }, access: 'front', url: IK + 'ragrund-regal-bambus-80549420/' },
+  relaxBamboo: { name: 'Relaxdays Badregal Bambus', note: 'Preis ca.', shop: 'Galaxus', price: 60.00, w: 0.33, d: 0.255, h: 1.19, kind: 'shelf', mat: 'bamboo', shelves: 4,
+    clear: { front: [0.6, 0.7] }, access: 'front', url: 'https://www.galaxus.ch/de/s14/product/relaxdays-badregal-33-x-2550-x-119-cm-badezimmerregal-13873470' },
   paleseBench: { name: 'tectake Palese Bank', note: 'Masse geschätzt', shop: 'Galaxus', price: 130.90, w: 1.15, d: 0.60, h: 0.70, kind: 'lounge', mat: 'rattan',
     type: 'chair', access: 'chair', url: 'https://www.galaxus.ch/de/s4/product/tectake-rattan-gartenset-palese-fuer-4-personen-gartenlounge-54773834' },
   paleseChair: { name: 'tectake Palese Sessel', note: 'im Set, Masse geschätzt', shop: 'Galaxus', price: 0, w: 0.60, d: 0.60, h: 0.70, kind: 'lounge', mat: 'rattan',
@@ -323,6 +328,7 @@ const DEFAULTS = {
     { id: 'bstuhl1', cat: 'tarnoChair', x: 1.00, z: 2.83, rot: 0 },
     { id: 'bstuhl2', cat: 'tarnoChair', x: 1.00, z: 3.77, rot: 180 },
     { id: 'bstuhl3', cat: 'tarnoChairX', x: 1.47, z: 3.30, rot: -90 },
+    { id: 'badregal', cat: 'ragrund', x: 6.155, z: 7.80, rot: -90 },
   ],
   galaxus: [
     ...SHARED,
@@ -336,6 +342,7 @@ const DEFAULTS = {
     { id: 'btisch', cat: 'paleseTable', x: 1.12, z: 3.30, rot: 0 },
     { id: 'bsessel1', cat: 'paleseChair', x: 1.12, z: 2.55, rot: 0 },
     { id: 'bsessel2', cat: 'paleseChair', x: 1.12, z: 4.05, rot: 180 },
+    { id: 'badregal', cat: 'relaxBamboo', x: 6.2125, z: 7.80, rot: -90 },
   ],
 };
 
@@ -481,6 +488,7 @@ const MAT = {
   woodLight: M(0xcfae84, { map: grainTex, roughness: 0.6 }),
   acacia: M(0xa8764a, { map: grainTex, roughness: 0.65 }),
   rubberwood: M(0xc9a57a, { map: grainTex }),
+  bamboo: M(0xdcbc84, { map: grainTex, roughness: 0.5 }),
   blackBrown: M(0x3b322c, { map: grainTex, roughness: 0.55 }),
   white: M(0xf1eee8, { roughness: 0.5 }),
   black: M(0x2a2826, { roughness: 0.5 }),
@@ -669,6 +677,15 @@ const BUILD = {
     for (let i = 0; i < 4; i++) {
       const s = box(c.w - 0.04, 0.012, c.d - 0.03, fr, 0, 0.06 + i * 0.2, 0);
       s.rotation.x = -0.18; g.add(s);
+    }
+    return g;
+  },
+  shelf(c) {
+    const g = new THREE.Group(), m = MAT[c.mat], t = 0.025;
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(box(t, c.h, t, m, sx * (c.w / 2 - t / 2), 0, sz * (c.d / 2 - t / 2)));
+    for (let i = 0; i < c.shelves; i++) {
+      const y = 0.08 + i * (c.h - 0.1) / (c.shelves - 1);
+      g.add(box(c.w - 0.01, 0.015, c.d - 0.01, m, 0, Math.min(y, c.h - 0.015), 0));
     }
     return g;
   },
