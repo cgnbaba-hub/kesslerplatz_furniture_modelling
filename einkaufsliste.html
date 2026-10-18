@@ -121,7 +121,7 @@
     <div class="hint" id="kpi-budget">Budget CHF 1'500</div>
   </div>
   <div class="kpi">
-    <div class="label">Variante IKEA (Empfehlung)</div>
+    <div class="label">Variante IKEA (deine Auswahl)</div>
     <div class="value num" id="kpi-ikea">–</div>
     <div class="hint">alle Kategorien IKEA, ohne Optionales</div>
   </div>
@@ -192,7 +192,7 @@
       <p><b>Ergebnis: Ein 160er-Bett passt gut.</b> Ich habe das Schlafzimmer aus dem Grundriss (Massstab 1:100) vermessen: innen ca. <b>3.75 m × 4.09 m</b>, das ergibt 15.3 m². Im Plan stehen 15.5 m², das passt also.</p>
       <p>Mit Kopfteil an der Südwand (gegenüber der Tür) bleiben neben einem MALM 160 (aussen 176 cm) <b>auf beiden Seiten ca. 100 cm</b>. Zwischen Fussende und Türschwenkbereich bleiben ca. 120 cm. Die Tür schlägt also frei auf, und die Kommode passt an die Nordwand links neben die Tür.</p>
       <p>Ein 140er (gestrichelt) würde je ca. 8 cm mehr Platz pro Seite lassen. Das bringt hier wenig. Gebrauchte 160er-Betten und 160er-Matratzen verkaufen sich auf Tutti ausserdem etwas besser, weil Paare sie suchen.</p>
-      <p class="muted">Offene Frage für Aufgabe 2: Im Grundriss ist im Zimmer <b>kein Einbauschrank eingezeichnet</b>, nur in der Küche und im Reduit (X-Symbol). Falls an einer Wand ein Schrank von ca. 60 cm Tiefe steht, bleiben immer noch ≥ 70 cm neben dem Bett. Das 160er passt also auch dann.</p>
+      <p><b>Deine Wahl ist das 140er (SLATTUM, aussen 144 cm).</b> Damit bleiben neben dem Bett je ca. 115 cm. Im Zimmer ist laut dir kein Einbauschrank.</p>
       <div class="legend">
         <span><span class="sw" style="background:var(--oak)"></span>Möbel (MALM)</span>
         <span><span class="sw" style="background:var(--warn-soft);border:1px dashed var(--warn)"></span>Türschwenkbereich</span>
@@ -269,7 +269,7 @@
   </div>
   <div>
     <h3>Abholen oder liefern lassen?</h3>
-    <p><b>Selbst abholen:</b> Die Empfehlung (ohne Sofa) passt in einen kleinen Transporter. Das längste Paket ist das MALM-Kopfteil mit gut 1.8 m. Ein Transporter für einen halben Tag kostet erfahrungsgemäss ca. CHF 80–130 (Mobility/Europcar, nicht geprüft).</p>
+    <p><b>Selbst abholen:</b> Die Empfehlung (ohne Sofa) passt in einen kleinen Transporter. Das längste Paket ist das SLATTUM-Bett mit 1.55 m, ein Kombi reicht knapp, ein kleiner Transporter sicher. Ein Transporter für einen halben Tag kostet erfahrungsgemäss ca. CHF 80–130 (Mobility/Europcar, nicht geprüft).</p>
     <p><b>IKEA-Standardlieferung</b> bis in die Wohnung: CHF 109.95 bis Warenwert 750, darüber CHF 129.95 (mit IKEA Family je CHF 10 weniger). Bordsteinlieferung ab CHF 69.95. <a href="https://www.ikea.com/ch/de/customer-service/services/delivery/">Lieferpreise IKEA</a></p>
     <p class="muted">Die Liefer- bzw. Transportkosten sind in den Summen oben <b>nicht</b> enthalten.</p>
   </div>
@@ -287,7 +287,7 @@ const CATS = [
     id: 'schuh', name: 'Schuhschrank', where: 'Eingang/Flur', rec: 'ikea',
     ikea: { name: 'BISSA Schuhschrank 2fach, Eichenachbildung', price: 29.95, dims: '49 × 28 × 93 cm',
       url: 'https://www.ikea.com/ch/de/p/bissa-schuhschrank-2fach-eichenachbildung-70530218/',
-      avail: 'Standardsortiment, Mitnahme in Spreitenbach/Dietlikon (Bestand vor Ort prüfen)', resale: [10, 15] },
+      avail: 'Preis von dir auf ikea.com bestätigt (18.10.). Standardsortiment, Mitnahme', resale: [10, 15] },
     gal: { name: 'Vasagle Oklahoma Schuhregal, 5 Ebenen', price: 36.90, priceNote: 'gesehen CHF 29.00–47.50', dims: '75 × 28 × 93 cm',
       url: 'https://www.galaxus.ch/de/search?q=Vasagle%20Oklahoma',
       avail: 'Versand, Lieferzeit je nach Lager auf der Produktseite', resale: [5, 10] },
@@ -295,83 +295,83 @@ const CATS = [
     alt: 'Für mehr Schuhe: zweimal BISSA nebeneinander (CHF 59.90), oder HEMNES Schuhschrank 2fach 89 × 30 × 127 cm für CHF 169.00 (Massivholz, sehr gut wiederverkäuflich, aber teuer).'
   },
   {
-    id: 'bett', name: 'Bett 160 × 200', where: 'Schlafzimmer', rec: 'ikea',
-    ikea: { name: 'MALM Bettgestell hoch, Eichenfurnier weiss lasiert, 160×200', price: 259.00, priceNote: 'gesehen CHF 239–259', dims: '176 × 209 × 100 cm (Kopfteil), Fussteil 38 cm',
-      url: 'https://www.ikea.com/ch/de/p/malm-bettgestell-hoch-eichenfurnier-weiss-lasiert-s19022549/',
-      avail: 'Standardsortiment, Mitnahme (2 Pakete). Lattenrost separat', resale: [80, 130] },
-    gal: { name: 'vidaXL Legenborn Polsterbett 160×200, dunkelgrau', price: 147.01, priceNote: 'je nach Farbe CHF 146–172. Die 140er von deiner Merkliste kostet ca. CHF 123–131', dims: '165 × 218 × 74.5 cm',
-      url: 'https://www.galaxus.ch/en/s14/product/vidaxl-legenborn-160-x-200-cm-bed-43479803',
-      avail: '> 10 Stk. beim Drittanbieter vidaXL CH, ca. 1–2 Wochen. Bewertung 3.2/5 (6 Bewertungen)', resale: [30, 50] },
-    why: 'MALM in hellem Eichenfurnier ist der Inbegriff von «hell und skandinavisch» und auf Tutti der meistgesuchte Bettname. Das Legenborn ist gut CHF 110 günstiger. Es hat aber schwache Bewertungen (Seitenteile passen nicht exakt) und als Stoffbett von vidaXL kaum Wiederverkaufswert.',
-    alt: 'Spar-Tipp IKEA: SLATTUM Polsterbett 160×200 (164 × 206 cm, Kopfteil 85 cm) für CHF 169.00, <b>Lattenrost bereits integriert</b>. Damit entfällt LURÖY, und du sparst insgesamt CHF 130. Nachteil: grauer Stoff statt Holz. <a href="https://www.ikea.com/ch/en/p/slattum-upholstered-bed-frame-vissle-dark-grey-40571248/">SLATTUM ansehen</a>. Galaxus-Holzalternative: vidaXL Achim Kiefer massiv inkl. Lattenrost, ca. CHF 153 (<a href="https://www.galaxus.ch/de/s14/product/vidaxl-achim-160-x-200-cm-bett-41902560">Link</a>).'
+    id: 'bett', name: 'Bett 140 × 200', where: 'Schlafzimmer', rec: 'ikea',
+    ikea: { name: 'SLATTUM Bettgestell gepolstert, Vissle dunkelgrau, 140×200 (deine Wahl)', price: 149.00, priceNote: 'Lattenrost und Mittelbalken laut IKEA dabei (auf der Produktseite prüfen). Als 160er CHF 169.00', dims: '144 × 206 cm, Kopfteil 85 cm, Fussteil 40 cm',
+      url: 'https://www.ikea.com/ch/de/p/slattum-bettgestell-gepolstert-vissle-dunkelgrau-00571245/',
+      avail: 'Standardsortiment, Mitnahme (1 Paket, 155 cm lang, 34 kg)', resale: [50, 80] },
+    gal: { name: 'vidaXL Legenborn Polsterbett 140×200 (deine Merkliste)', price: 125.01, priceNote: 'gesehen CHF 123–131 je nach Farbe', dims: '145 × 218 × 74.5 cm',
+      url: 'https://www.galaxus.ch/en/s14/product/vidaxl-legenborn-140-x-200-cm-bed-43480100',
+      avail: 'Drittanbieter vidaXL CH, ca. 1–2 Wochen. Bewertung 3.2/5', resale: [25, 40] },
+    why: 'Deine Wahl: SLATTUM ist nur CHF 24 teurer als das Legenborn, bringt den Lattenrost mit und ist bei IKEA nachkaufbar und bekannt. Im 3D-Modell bleiben mit dem 140er neben dem Bett je ca. 115 cm frei.',
+    alt: '<b>Achtung, 140 statt 160:</b> Dein Link ist die 140er-Variante. Die 160er kostet CHF 20 mehr (Bett), die Matratze CHF 30 mehr. Allein reicht 140 gut, zu zweit wird es eng. Holz-Alternative: MALM Eichenfurnier 160×200 für CHF 259 plus LURÖY CHF 40 (<a href="https://www.ikea.com/ch/de/p/malm-bettgestell-hoch-eichenfurnier-weiss-lasiert-s19022549/">Link</a>).'
   },
   {
-    id: 'matratze', name: 'Matratze + Lattenrost', where: 'Schlafzimmer', rec: 'ikea',
-    ikea: { name: 'VALEVÅG Taschenfederkernmatratze fest, 160×200 + LURÖY Federholzrahmen 160×200', price: 389.00, priceNote: 'Matratze CHF 349.00 + Lattenrost CHF 40.00 (Matratze zeitweise CHF 296–299 in Aktion)', dims: 'Matratze 160 × 200 × 24 cm, 5 Zonen. Lattenrost 2 × 80 × 200 cm',
-      url: 'https://www.ikea.com/ch/de/p/valevag-taschenfederkernmatratze-fest-hellblau-40450680/',
-      url2: 'https://www.ikea.com/ch/de/p/luroey-federholzrahmen-s39481357/',
-      avail: 'Matratze gerollt zum Mitnehmen. 90 Tage Umtausch, 10 Jahre Garantie. Auch als «mittelfest» erhältlich', resale: [10, 80] },
-    gal: { name: 'vidaXL Labelia Taschenfederkern 160×200 + Floki24 Rollrost 160×200', price: 330.00, priceNote: 'Matratze CHF 262–345 + Rollrost CHF 68.00', dims: 'Matratze 160 × 200 cm (Höhe auf Produktseite prüfen). Rollrost 160 × 200 cm',
-      url: 'https://www.galaxus.ch/de/search?q=vidaXL%20Labelia%20160',
+    id: 'matratze', name: 'Matratze', where: 'Schlafzimmer', rec: 'ikea',
+    ikea: { name: 'VESTMARKA Federkernmatratze mittelfest, 140×200 (deine Wahl)', price: 189.00, priceNote: '160×200: CHF 219.00', dims: '140 × 200 × 18 cm, Bonell-Federkern',
+      url: 'https://www.ikea.com/ch/de/p/vestmarka-federkernmatratze-mittelfest-hellblau-70451287/',
+      avail: 'Gerollt zum Mitnehmen. 90 Tage Umtausch, 10 Jahre Garantie', resale: [0, 40] },
+    gal: { name: 'vidaXL Labelia Taschenfederkern 140×200 + Floki24 Rollrost 140×200', price: 330.00, priceNote: 'Preis vom 160er (CHF 262 + 68). Den 140er-Preis fand ich nicht, er dürfte etwas tiefer liegen', dims: 'Matratze 140 × 200 cm (Höhe auf Produktseite prüfen). Rollrost 140 × 200 cm',
+      url: 'https://www.galaxus.ch/de/search?q=vidaXL%20Labelia%20140',
       url2: 'https://www.galaxus.ch/de/s14/product/floki24-lattenrost-140-x-200-cm-rolllattenrost-kiefer-massivholz-bett-rollrost-lattenrost-52962738',
       avail: 'Versand. Härtegrad der Labelia nicht angegeben, kein Probeschlafen', resale: [0, 30] },
-    why: 'Hier lohnt IKEA trotz des höheren Preises. Bei VALEVÅG kannst du 90 Tage umtauschen. Wenn «fest» nicht passt, tauschst du in Spreitenbach. Bei Galaxus kaufst du blind. LURÖY für CHF 40 ist der einfache Standardrost für MALM.',
-    alt: 'Günstiger bei IKEA: VESTMARKA Federkernmatratze 160×200 für CHF 219.00 (weniger Zonen und Komfort). Kauf sie, wenn das Budget eng wird. Wichtig: Falls das Legenborn einen Lattenrost mitbringt, entfällt der Floki24-Rost (vor Bestellung prüfen).'
+    why: 'VESTMARKA ist die einfache Federkernmatratze von IKEA. Für 1.5–2 Jahre ist das vertretbar, und dank 90 Tagen Umtausch kannst du auf VALEVÅG wechseln, falls sie dir zu hart oder zu weich ist. Einen Lattenrost brauchst du dank SLATTUM nicht.',
+    alt: 'Mehr Komfort: VALEVÅG Taschenfederkern 140×200, als 160er CHF 349 (<a href="https://www.ikea.com/ch/de/p/valevag-taschenfederkernmatratze-mittelfest-hellblau-10450667/">Link</a>). Bei Galaxus: Falls das Legenborn einen Lattenrost mitbringt, entfällt der Rollrost.'
   },
   {
-    id: 'nacht', name: 'Nachttische (2 Stück)', where: 'Schlafzimmer', rec: 'ikea', qty: 2,
-    ikea: { name: 'MALM Kommode mit 2 Schubladen, Eichenfurnier weiss lasiert', price: 49.95, dims: '40 × 48 × 55 cm',
-      url: 'https://www.ikea.com/ch/de/cat/nachttische-beistelltische-20656/f/eiche-nachttische-und-beistelltische-f-appearance--50679/',
-      avail: 'Standardsortiment, Mitnahme. Zeitweise CHF 37.45 im Einrichtungshaus', resale: [20, 25] },
+    id: 'nacht', name: 'Nachttisch', where: 'Schlafzimmer', rec: 'ikea',
+    ikea: { name: 'KULLEN Kommode mit 2 Schubladen, schwarzbraun (deine Wahl)', price: 39.95, dims: '35 × 40 × 49 cm',
+      url: 'https://www.ikea.com/ch/de/p/kullen-kommode-mit-2-schubladen-schwarzbraun-60322130/',
+      avail: 'Standardsortiment, Mitnahme. In Weiss CHF 29.95', resale: [10, 15] },
     gal: { name: 'Skye Decor Caleb Nachttisch', price: 26.90, priceNote: 'Preis von deiner Merkliste. Das Produkt fand ich im Suchindex nicht', dims: '25 × 27 × 60 cm',
       url: 'https://www.galaxus.ch/de/search?q=Skye%20Decor%20Caleb',
       avail: 'Lieferzeit auf der Produktseite prüfen', resale: [5, 8] },
-    why: 'Die Nachttische passen zu MALM-Bett und -Kommode und werden auf Tutti als Set gesucht. Der Caleb ist mit 25 × 27 cm sehr klein: Wecker, Lampe und Handy passen kaum gleichzeitig darauf. Bei ca. 100 cm Platz neben dem Bett haben 40 cm breite Nachttische locker Platz.',
-    alt: 'Günstiger: KULLEN 2 Schubladen weiss, 35 × 40 × 49 cm, CHF 29.95 pro Stück (<a href="https://www.ikea.com/ch/de/p/kullen-kommode-mit-2-schubladen-weiss-80309241/">Link</a>). Oder nur ein Nachttisch, falls du allein schläfst.'
+    why: 'Deine Wahl: Die KULLEN in Schwarzbraun ist der schwarze Akzent im Schlafzimmer. Sie ist eine echte Schubladenkommode und kein Stoff- oder Spanplatten-Würfel wie der Caleb, der mit 25 × 27 cm ohnehin sehr klein ist.',
+    alt: 'Passend zum Holzlook wäre der MALM 2 Schubladen in Eichenfurnier, 40 × 48 × 55 cm, CHF 49.95.'
   },
   {
-    id: 'kommode', name: 'Kommode Schlafzimmer', where: 'Schlafzimmer', rec: 'ikea',
-    ikea: { name: 'MALM Kommode mit 3 Schubladen, Eichenfurnier weiss lasiert', price: 99.95, priceNote: 'zeitweise CHF 74.95 im Einrichtungshaus', dims: '80 × 48 × 78 cm',
+    id: 'kommode', name: 'Kommode Schlafzimmer (noch offen)', where: 'Schlafzimmer', rec: 'ikea',
+    ikea: { name: 'MALM Kommode mit 3 Schubladen, Eichenfurnier weiss lasiert (mein Vorschlag, nicht in deiner Liste)', price: 99.95, priceNote: 'zeitweise CHF 74.95 im Einrichtungshaus', dims: '80 × 48 × 78 cm',
       url: 'https://www.ikea.com/ch/de/cat/kommoden-10451/f/beige-kommoden-f-colors--10003/',
       avail: 'Standardsortiment, Mitnahme. Muss an der Wand befestigt werden', resale: [40, 55] },
     gal: { name: 'Songmics Ingrid Kommode (7 Stoffschubladen, Stahlgestell)', price: 49.50, priceNote: 'gesehen CHF 46.50–51.90', dims: '98.8 × 30 × 73.7 cm',
       url: 'https://www.galaxus.ch/de/search?q=Songmics%20Ingrid',
       avail: 'Versand. Bewertung 4.5/5', resale: [10, 15] },
-    why: 'Die Kommode passt optisch zum Bett. Feste Schubladen auf Metallschienen halten auch Ab- und Aufbau aus. Die Ingrid ist eher ein Stoffboxen-Regal: günstig und leicht, aber sie sieht schnell billig aus und hat fast keinen Wiederverkaufswert.',
+    why: 'In deiner Liste fehlt die Kommode. Ich habe meinen Vorschlag drin gelassen, du kannst die Kategorie unten abwählen. Feste Schubladen auf Metallschienen halten auch Ab- und Aufbau aus. Die Ingrid ist eher ein Stoffboxen-Regal: günstig und leicht, aber sie sieht schnell billig aus und hat fast keinen Wiederverkaufswert.',
     alt: 'Mehr Stauraum: KULLEN 6 Schubladen, 140 × 40 × 72 cm, ab CHF 125.00 (weiss).'
   },
   {
     id: 'tv', name: 'Kleiner TV-Tisch', where: 'Wohnen', rec: 'ikea',
-    ikea: { name: 'LACK TV-Bank, weiss', price: 14.95, dims: '90 × 36 × 45 cm',
-      url: 'https://www.ikea.com/ch/de/p/lack-tv-bank-weiss-00625521/',
-      avail: 'Standardsortiment, Mitnahme. Trägt TV bis 10 kg', resale: [5, 10] },
+    ikea: { name: 'KALLAX TV-Bank, schwarzbraun (deine Wahl)', price: 79.95, priceNote: 'CH-Seite zeigt teils CHF 79.95 (statt 89.95), teils 89.95', dims: '147 × 39 × 60 cm',
+      url: 'https://www.ikea.com/ch/de/p/kallax-tv-bank-schwarzbraun-10562090/',
+      avail: 'Standardsortiment, Mitnahme. TV bis 16 kg', resale: [30, 45] },
     gal: { name: 'Songmics/Vasagle Bianca TV-Möbel, weiss mit Holzbeinen', price: 64.00, priceNote: 'gesehen CHF 48.70–64.00', dims: '120 × 40 × 49.5 cm',
       url: 'https://www.galaxus.ch/de/search?q=Songmics%20Bianca%20TV',
       avail: 'Versand. Bewertung 4.7/5 (32 Bewertungen)', resale: [15, 25] },
-    why: 'Für einen kleinen TV-Tisch ist LACK für CHF 15 kaum zu schlagen. Du verlierst beim Verkauf praktisch nichts. Die Bianca sieht mit den Gummibaum-Beinen mehr nach Japandi aus und hat Stauraum. Das ist der einzige Fall, in dem Galaxus optisch klar vorne liegt. Wenn dir das CHF 50 wert ist, nimm sie.',
-    alt: 'IKEA mit Stauraum: BESTÅ TV-Bank weiss, 120 × 40 × 38 cm, CHF 70.00 (<a href="https://www.ikea.com/ch/de/p/besta-tv-bank-weiss-80294503/">Link</a>).'
+    why: 'Deine Wahl: KALLAX ist einer der IKEA-Bestseller auf Tutti und passt mit Kallax-Einsätzen zu viel Stauraum. Mit 147 cm ist sie kein «kleiner» TV-Tisch mehr. Im 3D-Modell passt sie aber gut an die Wand zum Bad.',
+    alt: 'Kleiner und billiger: LACK TV-Bank weiss 90 × 36 × 45 cm, CHF 14.95 (<a href="https://www.ikea.com/ch/de/p/lack-tv-bank-weiss-00625521/">Link</a>), oder BESTÅ weiss 120 × 40 × 38 cm, CHF 70.00.'
   },
   {
     id: 'couchtisch', name: 'Couchtisch', where: 'Wohnen', rec: 'ikea',
-    ikea: { name: 'BORGEBY Couchtisch, Birkenfurnier, Ø 70 cm', price: 129.00, dims: 'Ø 70 × 42 cm, mit Ablage',
-      url: 'https://www.ikea.com/ch/de/p/borgeby-couchtisch-birkenfurnier-70389356/',
-      avail: 'Standardsortiment, Mitnahme (1 flaches Paket, 9 kg)', resale: [50, 70] },
+    ikea: { name: 'VITTERYD Couchtisch verstellbar, weiss (deine Wahl)', price: 169.00, dims: '97 × 59–62 cm, Höhe 49–64 cm',
+      url: 'https://www.ikea.com/ch/de/p/vitteryd-couchtisch-verstellbar-weiss-20530065/',
+      avail: 'Mitnahme (2 Pakete, ca. 34 kg)', resale: [60, 90] },
     gal: { name: 'Vasagle Couchtisch rund mit 2 Ablagen', price: 101.00, dims: '80 × 80 × 45 cm',
       url: 'https://www.galaxus.ch/de/s14/product/vasagle-couchtisch-80-x-80-x-45-cm-couchtisch-beistelltisch-67117474',
       avail: 'Versand. Holzwerkstoff', resale: [20, 30] },
-    why: 'BORGEBY aus heller Birke mit runder Form ist sehr japandi und lässt den Laufweg zwischen Sofa und TV frei. Der LISABO 118 × 50 erscheint auf ikea.com/ch nicht mehr im Sortiment (nur noch in AT/DE). Deshalb habe ich ihn nicht genommen.',
-    alt: 'Günstiger: VITTSJÖ Couchtisch schwarzbraun/Glas Ø 75 cm, CHF 79.95. Das ist der schwarze Akzent, aber weniger warm (<a href="https://www.ikea.com/ch/de/p/vittsjoe-couchtisch-schwarzbraun-glas-80213309/">Link</a>). BORGEBY gibt es auch in schwarz zum gleichen Preis.'
+    why: 'Deine Wahl: Der VITTERYD lässt sich auf 64 cm hochstellen. Damit wird er zum Esstisch vom Sofa aus oder zum Laptop-Tisch. Er ist der teuerste Posten der Liste, hält seinen Wert aber eher als ein billiger Tisch.',
+    alt: 'Günstiger: BORGEBY Birkenfurnier Ø 70 cm, CHF 129.00 (<a href="https://www.ikea.com/ch/de/p/borgeby-couchtisch-birkenfurnier-70389356/">Link</a>), oder VITTSJÖ schwarzbraun/Glas Ø 75 cm, CHF 79.95.'
   },
   {
     id: 'balkon', name: 'Balkongarnitur', where: 'Balkon (ca. 1.9 × 3.6 m)', rec: 'ikea',
-    ikea: { name: 'TÄRNÖ Tisch + 2 Stühle, schwarz/hellbraun lasiert (Akazie massiv)', price: 69.95, dims: 'Tisch 55 × 54 × 70 cm, Stuhl 39 × 40 × 79 cm (klappbar)',
-      url: 'https://www.ikea.com/ch/de/p/taernoe-tisch-2-stuehle-aussen-schwarz-hellbraun-lasiert-s69898415/',
-      avail: 'Saisonartikel, im Oktober/November evtl. reduziertes Lager. Vorher prüfen', resale: [30, 45] },
+    ikea: { name: 'TÄRNÖ Tisch + 2 Stühle faltbar mit Kuddarna-Kissen + 1 zusätzlicher TÄRNÖ-Stuhl (deine Wahl)', price: 104.95, priceNote: 'Set CHF 84.95 + Stuhl CHF 20.00 (ohne Kissen)', dims: 'Tisch 55 × 54 × 70 cm, Stuhl 39 × 40 × 79 cm (klappbar)',
+      url: 'https://www.ikea.com/ch/de/p/taernoe-tisch-2-stuehle-aussen-schwarz-hellbraun-lasiert-faltbar-faltbar-kuddarna-helles-graubeige-s29575342/',
+      url2: 'https://www.ikea.com/ch/de/p/taernoe-stuhl-aussen-faltbar-schwarz-hellbraun-lasiert-90095428/',
+      avail: 'Saisonartikel, im Oktober/November evtl. reduziertes Lager. Vorher prüfen', resale: [40, 55] },
     gal: { name: 'tectake Palese Rattan-Lounge (Bank, 2 Sessel, Glastisch)', price: 130.90, priceNote: 'gesehen CHF 119.52–149.90', dims: 'Masse fehlen auf Galaxus (Datenfehler «1104 cm»). Vor Kauf prüfen',
       url: 'https://www.galaxus.ch/de/s4/product/tectake-rattan-gartenset-palese-fuer-4-personen-gartenlounge-54773834',
       avail: 'Versand. Bewertung 4.6–4.8/5', resale: [40, 60] },
     why: 'Akazie mit schwarzem Stahl trifft deinen Stil genau, und klappbar heisst: im Winter weg. Auf ca. 1.9 m Balkontiefe braucht das Set nur ca. 1.3 × 1.3 m. Die Palese-Lounge wäre gemütlicher, aber Polyrattan mit Glastisch wirkt weniger Japandi und füllt den schmalen Balkon fast komplett.',
-    alt: 'Sitzkissen: TÄRNÖ-Set mit Kuddarna-Kissen CHF 84.95. Ich würde die Garnitur ehrlich gesagt erst im März kaufen, dann ist die Auswahl grösser und der Balkon wird überhaupt benutzt.'
+    alt: 'Für den dritten Stuhl fehlt noch ein Kissen. Ich würde die Garnitur ehrlich gesagt erst im März kaufen, dann ist die Auswahl grösser und der Balkon wird überhaupt benutzt.'
   }
 ];
 
@@ -430,7 +430,7 @@ const SOURCES = [
 const fmt = n => 'CHF ' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
 const fmt0 = n => 'CHF ' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
 const BUDGET = 1500;
-const KEY = 'kesslerplatz-einkauf-v1';
+const KEY = 'kesslerplatz-einkauf-v2';
 
 let state = { pick: {}, extras: {} };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.pick) state = s; } catch (e) {}

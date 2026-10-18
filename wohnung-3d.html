@@ -1,0 +1,1343 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wohnung Kesslerplatz 3D</title>
+<style>
+  :root {
+    --bg: #ece7de;
+    --panel: rgba(255, 253, 248, 0.96);
+    --ink: #26221e;
+    --muted: #6d655b;
+    --line: #e2d9ca;
+    --accent: #4c5a2f;
+    --accent-soft: #e4e8d6;
+    --clay: #a8603b;
+    --red: #c0392b;
+    --red-soft: #f8e1dd;
+    --amber: #b7791f;
+    --amber-soft: #fbeed3;
+    --green: #3f7d3a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1a17; --panel: rgba(36, 33, 29, 0.96); --ink: #eee7dc; --muted: #a99f92; --line: #3a352e;
+      --accent: #a9b986; --accent-soft: #2c3222; --clay: #d98a62;
+      --red: #ef7b6c; --red-soft: #3d2320; --amber: #e8b35a; --amber-soft: #3a2e1a; --green: #8fca86;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink);
+    font: 13.5px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; }
+  #stage { position: fixed; inset: 0; }
+  #stage canvas { display: block; outline: none; }
+  #labels { position: fixed; inset: 0; pointer-events: none; }
+
+  #panel { position: fixed; top: 12px; left: 12px; bottom: 12px; width: 330px; overflow-y: auto;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 14px 18px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.08); z-index: 5; }
+  #panel.collapsed { bottom: auto; overflow: hidden; }
+  #panel.collapsed .body { display: none; }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  h1 { font-size: 16px; margin: 0; }
+  h2 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 16px 0 6px; font-weight: 600; }
+  .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 7px;
+    padding: 5px 9px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button { border: none; border-radius: 0; padding: 7px 6px; }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button.on { background: var(--accent); color: #fff; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .seg button.on { color: #1c1a17; } }
+  .seg small { display: block; font-size: 11px; opacity: .85; }
+  .toggles { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+  .toggles label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+  input[type=checkbox] { accent-color: var(--accent); }
+  .card { border: 1px solid var(--line); border-radius: 9px; padding: 10px 11px; }
+  .card .name { font-weight: 600; }
+  .card .meta { color: var(--muted); font-size: 12.5px; margin: 2px 0 8px; }
+  .row { display: flex; gap: 5px; flex-wrap: wrap; }
+  .row button { padding: 4px 8px; }
+  .issues { list-style: none; margin: 0; padding: 0; }
+  .issues li { padding: 6px 8px; border-radius: 7px; margin-bottom: 4px; cursor: pointer; font-size: 12.5px; }
+  .issues li.red { background: var(--red-soft); border-left: 3px solid var(--red); }
+  .issues li.amber { background: var(--amber-soft); border-left: 3px solid var(--amber); }
+  .issues li.ok { background: var(--accent-soft); border-left: 3px solid var(--green); cursor: default; }
+  .flist label { display: flex; gap: 7px; align-items: baseline; padding: 3px 0; cursor: pointer; }
+  .flist .p { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .flist .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; align-self: center; background: var(--green); }
+  .flist .dot.red { background: var(--red); } .flist .dot.amber { background: var(--amber); }
+  .note { font-size: 12px; color: var(--muted); background: var(--amber-soft); border-radius: 7px; padding: 8px 9px; }
+  .help { font-size: 12px; color: var(--muted); }
+  .help kbd { font: 11px ui-monospace, Menlo, monospace; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+  .total { font-variant-numeric: tabular-nums; font-weight: 650; }
+
+  #egohint { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: rgba(20,18,16,.78); color: #fff;
+    padding: 8px 14px; border-radius: 99px; font-size: 13px; display: none; z-index: 6; pointer-events: none; }
+  #cross { position: fixed; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.85); display: none; z-index: 6; pointer-events: none; box-shadow: 0 0 2px rgba(0,0,0,.6); }
+  #compass { position: fixed; right: 16px; top: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 50%;
+    width: 40px; height: 40px; display: grid; place-items: center; font-weight: 700; font-size: 12px; z-index: 4; }
+
+  .lbl { background: rgba(255,253,248,.92); color: #26221e; border: 1px solid #d9cfbf; border-radius: 6px; padding: 1px 6px;
+    font-size: 11px; line-height: 1.3; white-space: nowrap; text-align: center; transform: translateY(-4px); }
+  .lbl b { font-weight: 600; }
+  .lbl small { color: #6d655b; }
+  .lbl.room { background: transparent; border: none; color: #6d655b; font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+  .lbl.dist { font-weight: 650; font-size: 11.5px; padding: 0 5px; }
+  .lbl.dist.ok { background: #e4f1e1; border-color: #3f7d3a; color: #2a5a26; }
+  .lbl.dist.amber { background: #fbeed3; border-color: #b7791f; color: #7a4f0d; }
+  .lbl.dist.red { background: #f8e1dd; border-color: #c0392b; color: #8e2418; }
+  .lbl.sel { border-color: #4c5a2f; box-shadow: 0 0 0 2px rgba(76,90,47,.35); }
+  .lbl.bad { border-color: #c0392b; }
+  .hidden { display: none !important; }
+  .muted { color: var(--muted); }
+
+  @media (max-width: 720px) {
+    #panel { width: auto; right: 12px; bottom: auto; max-height: 55vh; }
+  }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="stage"></div>
+<div id="labels"></div>
+<div id="compass" title="Norden">N↑</div>
+<div id="egohint">Klicken zum Umsehen · <b>WASD</b> laufen · <b>←/→</b> drehen · <b>Esc</b> Maus freigeben</div>
+<div id="cross"></div>
+
+<aside id="panel">
+  <div class="head">
+    <div>
+      <h1>Wohnung 03.0406 · 3D</h1>
+      <div class="sub">Kesslerplatz Schlieren · 58 m² · Raumhöhe 2.50 m</div>
+    </div>
+    <button id="collapse" title="Panel ein-/ausklappen">–</button>
+  </div>
+  <div class="body">
+    <h2>Variante</h2>
+    <div class="seg" id="variant">
+      <button data-v="ikea">IKEA<small id="sum-ikea"></small></button>
+      <button data-v="galaxus">Galaxus<small id="sum-galaxus"></small></button>
+    </div>
+
+    <h2>Ansicht</h2>
+    <div class="seg" id="views">
+      <button data-view="orbit">3D-Orbit</button>
+      <button data-view="top">Draufsicht</button>
+      <button data-view="ego">Ego</button>
+    </div>
+    <div class="toggles" style="margin-top:8px">
+      <label><input type="checkbox" id="t-labels" checked> Beschriftung</label>
+      <label><input type="checkbox" id="t-dist" checked> Abstände</label>
+      <label><input type="checkbox" id="t-paths"> Laufwege</label>
+      <label><input type="checkbox" id="t-low"> Wände halbhoch</label>
+    </div>
+
+    <h2>Auswahl</h2>
+    <div class="card" id="sel">
+      <div class="meta" style="margin:0">Möbel anklicken und ziehen. Gedreht wird unten oder mit <b>R</b> / <b>Q</b> / <b>E</b>.</div>
+    </div>
+
+    <h2>Konflikte <span id="issue-count"></span></h2>
+    <ul class="issues" id="issues"></ul>
+
+    <h2>Möbel dieser Variante</h2>
+    <div class="flist" id="flist"></div>
+    <div class="row" style="margin-top:8px"><button id="reset">Layout zurücksetzen</button></div>
+
+    <h2>Bedienung</h2>
+    <div class="help">
+      <b>Ziehen</b> verschiebt (5-cm-Raster, mit <kbd>Alt</kbd> 1 cm).
+      <kbd>R</kbd> dreht um 90°, <kbd>Q</kbd>/<kbd>E</kbd> um 15°, ebenso <kbd>Shift</kbd>+Mausrad.
+      <kbd>Entf</kbd> blendet aus. Freie Fläche ziehen: drehen (Orbit) bzw. verschieben (Draufsicht). Mausrad zoomt.
+    </div>
+
+    <h2>Grundlagen</h2>
+    <div class="note">
+      Wände, Türen und Fenster stammen aus dem Grundriss 1:100, auf ca. ±3 cm genau vermessen. Raumhöhe 2.50 m (von dir).
+      <b>Annahmen:</b> Fenster raumhoch, Türhöhe 2.10 m, Sofa = SÖDERHAMN 3er als Platzhalter,
+      dein Esstisch 140 × 80 cm mit 4 Stühlen (Masse bitte nachliefern), TV 55″.
+      Unklar: der geschlossene Block oben links (Schacht?) und das Element im Reduit.
+    </div>
+  </div>
+</aside>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+// ---------------------------------------------------------------------------
+// Grundriss (Meter). x = Ost, z = Süd, y = oben. Ursprung: Aussenecke Nordwest.
+// Vermessen aus dem Plan 1:100 (1 m = 56.7 px im eingebetteten Rasterbild).
+// ---------------------------------------------------------------------------
+const H = 2.5, DOOR_H = 2.1, WIN_HEAD = 2.3;
+
+// Massive Wandstücke [x0, z0, x1, z1] (volle Höhe)
+const WALLS = [
+  [0, 0, 8.54, 0.25],                         // Aussenwand Nord
+  [0, 0.25, 1.88, 1.53], [1.88, 0.25, 3.58, 1.30], // geschlossener Block NW (Schacht?)
+  [1.88, 1.30, 2.31, 1.93],                   // Pfeiler Balkon Nord
+  [8.13, 0.25, 8.54, 2.72], [8.13, 4.46, 8.54, 5.85], [8.13, 6.90, 8.54, 9.88], // Aussenwand Ost
+  [0, 9.65, 8.54, 9.88],                      // Aussenwand Süd
+  [0, 5.03, 0.40, 6.69], [0, 8.08, 0.40, 9.65], // Aussenwand West (Zimmer)
+  [0.40, 5.03, 1.02, 5.55],                   // Zimmer Nordwand zum Balkon
+  [1.99, 5.03, 2.31, 5.56],                   // Pfeiler Balkon Süd
+  [2.31, 5.43, 2.77, 5.56], [3.60, 5.43, 4.15, 5.56], // Wohnen | Zimmer
+  [4.15, 5.43, 4.27, 9.65],                   // Zimmer | Bad
+  [4.27, 5.43, 6.75, 5.56],                   // Wohnen | Bad
+  [6.34, 5.56, 6.49, 5.66], [6.34, 6.49, 6.49, 9.65], // Bad | Eingang/Reduit
+  [6.49, 7.37, 6.66, 7.49], [7.49, 7.37, 8.13, 7.49], // Reduit Nord
+];
+// Öffnungen: Fenster (Glas) und Türen (Sturz)
+const OPENINGS = [
+  { kind: 'window', r: [8.13, 2.72, 8.54, 4.46], sill: 0, head: WIN_HEAD, name: 'Fenster Wohnen Ost' },
+  { kind: 'window', r: [0, 6.69, 0.40, 8.08], sill: 0, head: WIN_HEAD, name: 'Fenster Zimmer West' },
+  { kind: 'window', r: [1.02, 5.03, 1.99, 5.55], sill: 0, head: WIN_HEAD, name: 'Fenster Zimmer zum Balkon' },
+  { kind: 'window', r: [2.13, 3.48, 2.31, 5.03], sill: 0, head: WIN_HEAD, name: 'Fensterfront Balkon (fix)' },
+  { kind: 'slide', r: [2.13, 1.93, 2.31, 3.48], head: WIN_HEAD, name: 'Schiebetür Balkon' },
+  { kind: 'door', r: [8.13, 5.85, 8.54, 6.90], head: DOOR_H },
+  { kind: 'door', r: [2.77, 5.43, 3.60, 5.56], head: DOOR_H },
+  { kind: 'door', r: [6.34, 5.66, 6.49, 6.49], head: DOOR_H },
+  { kind: 'door', r: [6.66, 7.37, 7.49, 7.49], head: DOOR_H },
+];
+// Türflügel: Band (hinge), Richtung geschlossen, Richtung offen, Breite
+const DOORS = [
+  { name: 'Wohnungstür', hinge: [8.13, 6.90], closed: [0, -1], open: [-1, 0], w: 1.02 },
+  { name: 'Tür Zimmer', hinge: [3.60, 5.56], closed: [-1, 0], open: [0, 1], w: 0.83 },
+  { name: 'Tür Bad', hinge: [6.49, 5.66], closed: [0, 1], open: [1, 0], w: 0.83 },
+  { name: 'Tür Reduit', hinge: [6.66, 7.37], closed: [1, 0], open: [0, -1], w: 0.83 },
+];
+// Freihaltezonen (kein Aufschlag, aber Durchgang)
+const KEEP_CLEAR = [
+  { name: 'Balkon-Schiebetür (innen)', r: [2.31, 1.93, 2.91, 3.48] },
+  { name: 'Balkon-Schiebetür (aussen)', r: [1.68, 1.93, 2.13, 3.48] },
+];
+const RAILINGS = [[0, 1.53, 0.08, 5.03]];
+// Einbauten laut Plan
+const BUILTINS = [
+  { name: 'Küche Hochschränke', r: [3.58, 0.25, 5.37, 0.88], y0: 0, y1: 2.3, kind: 'tall' },
+  { name: 'Küche Unterschränke', r: [5.37, 0.25, 8.13, 0.88], y0: 0, y1: 0.9, kind: 'base' },
+  { name: 'Küche Oberschränke', r: [5.37, 0.25, 8.13, 0.62], y0: 1.45, y1: 2.2, kind: 'upper', noFloor: true },
+  { name: 'Einbauschrank Reduit (laut Plan)', r: [6.52, 8.78, 8.0, 9.40], y0: 0, y1: 2.2, kind: 'tall' },
+  { name: 'WC', r: [4.52, 7.28, 5.07, 7.66], y0: 0, y1: 0.42, kind: 'sanitary' },
+  { name: 'Lavabo', r: [4.52, 7.96, 5.02, 8.55], y0: 0.78, y1: 0.92, kind: 'sanitary', noFloor: true },
+  { name: 'Vorwand Bad', r: [4.28, 6.96, 5.52, 7.03], y0: 0, y1: 1.2, kind: 'wallLow' },
+  { name: 'Vorwand Bad', r: [4.27, 7.03, 4.52, 9.65], y0: 0, y1: 1.2, kind: 'wallLow' },
+];
+const ROOMS = [
+  { name: 'Wohnen/Essen 31.8 m²', r: [2.31, 0.25, 8.13, 5.43], floor: 'parquet', label: [3.2, 1.9] },
+  { name: 'Eingang', r: [6.49, 5.43, 8.13, 7.37], floor: 'parquet', label: [7.3, 7.1] },
+  { name: 'Zimmer 15.5 m²', r: [0.40, 5.56, 4.15, 9.65], floor: 'parquet', label: [2.3, 6.3] },
+  { name: 'Bad/WC 7.7 m²', r: [4.27, 5.56, 6.34, 9.65], floor: 'tile', label: [5.6, 6.2] },
+  { name: 'Reduit 3.0 m²', r: [6.49, 7.49, 8.13, 9.65], floor: 'tile', label: [7.3, 8.1] },
+  { name: 'Balkon 7.2 m²', r: [0.08, 1.53, 2.13, 5.03], floor: 'deck', label: [1.0, 1.85] },
+  { name: 'Schacht? (geschlossen)', r: [0.4, 0.4, 3.3, 1.2], floor: null, label: [1.9, 0.75], high: true },
+];
+const ENTRY = [7.55, 6.45];
+const FIXED_TARGETS = [
+  { name: 'Küche', p: [6.5, 1.40] }, { name: 'Balkon', p: [1.75, 2.2] }, { name: 'Bad', p: [5.6, 6.3] },
+  { name: 'Zimmer', p: [3.2, 6.7] }, { name: 'Reduit', p: [7.3, 8.1] },
+];
+
+// ---------------------------------------------------------------------------
+// Möbelkatalog: w = Breite (lokal x), d = Tiefe (lokal z, Front = +z), h = Höhe
+// ---------------------------------------------------------------------------
+const IK = 'https://www.ikea.com/ch/de/p/';
+const CAT = {
+  sofa: { name: 'Sofa SÖDERHAMN 3er', note: 'Platzhalter, du suchst gebraucht', shop: '–', price: null, w: 1.98, d: 0.99, h: 0.83,
+    kind: 'sofa', mat: 'fabricBeige', clear: { front: [0.25, 0.30] }, access: 'sofa', url: IK + 'soederhamn-3er-sofa-fridtuna-hellbeige-s89449690/' },
+  diningTable: { name: 'Esstisch (Bestand)', note: 'Masse angenommen', shop: 'Bestand', price: null, w: 1.40, d: 0.80, h: 0.75,
+    kind: 'table', top: 'woodLight', legs: 'woodLight', type: 'table' },
+  diningChair: { name: 'Stuhl (Bestand)', note: 'Masse angenommen', shop: 'Bestand', price: null, w: 0.45, d: 0.50, h: 0.80,
+    kind: 'chair', seat: 'black', legs: 'black', type: 'chair', access: 'chair' },
+  // IKEA
+  bissa: { name: 'BISSA Schuhschrank', shop: 'IKEA', price: 29.95, w: 0.49, d: 0.28, h: 0.93, kind: 'cabinet', mat: 'oak', fronts: [1, 1],
+    clear: { front: [0.6, 0.7] }, access: 'front', url: IK + 'bissa-schuhschrank-2fach-eichenachbildung-70530218/' },
+  slattum: { name: 'SLATTUM 140 + VESTMARKA', shop: 'IKEA', price: 338.00, w: 1.44, d: 2.06, h: 0.85, kind: 'bed', mat: 'fabricGrey',
+    frameH: 0.30, footH: 0.40, mattress: [1.40, 2.00, 0.18], clear: { sides: [0.6, 0.7], foot: [0.6, 0.7] }, access: 'bed',
+    url: IK + 'slattum-bettgestell-gepolstert-vissle-dunkelgrau-00571245/' },
+  kullen: { name: 'KULLEN Nachttisch', shop: 'IKEA', price: 39.95, w: 0.35, d: 0.40, h: 0.49, kind: 'cabinet', mat: 'blackBrown', fronts: [1, 1],
+    type: 'nightstand', url: IK + 'kullen-kommode-mit-2-schubladen-schwarzbraun-60322130/' },
+  malm3: { name: 'MALM Kommode 3 Schubl.', note: 'nicht in deiner Liste', shop: 'IKEA', price: 99.95, w: 0.80, d: 0.48, h: 0.78, kind: 'cabinet', mat: 'oak',
+    fronts: [1, 1, 1], clear: { front: [0.6, 0.8] }, access: 'front', url: 'https://www.ikea.com/ch/de/cat/kommoden-10451/f/beige-kommoden-f-colors--10003/' },
+  kallax: { name: 'KALLAX TV-Bank', shop: 'IKEA', price: 79.95, w: 1.47, d: 0.39, h: 0.60, kind: 'kallax', mat: 'blackBrown', tv: true,
+    access: 'any', url: IK + 'kallax-tv-bank-schwarzbraun-10562090/' },
+  vitteryd: { name: 'VITTERYD Couchtisch', shop: 'IKEA', price: 169.00, w: 0.97, d: 0.60, h: 0.49, kind: 'vitteryd', mat: 'white',
+    type: 'table', url: IK + 'vitteryd-couchtisch-verstellbar-weiss-20530065/' },
+  tarnoTable: { name: 'TÄRNÖ Tisch + 2 Stühle', shop: 'IKEA', price: 84.95, w: 0.55, d: 0.54, h: 0.70, kind: 'table', top: 'acacia', legs: 'steel',
+    type: 'table', url: IK + 'taernoe-tisch-2-stuehle-aussen-schwarz-hellbraun-lasiert-faltbar-faltbar-kuddarna-helles-graubeige-s29575342/' },
+  tarnoChair: { name: 'TÄRNÖ Stuhl', note: 'im Set', shop: 'IKEA', price: 0, w: 0.39, d: 0.40, h: 0.79, kind: 'chair', seat: 'acacia', legs: 'steel',
+    cushion: 'cushion', type: 'chair', access: 'chair' },
+  tarnoChairX: { name: 'TÄRNÖ Stuhl (3.)', shop: 'IKEA', price: 20.00, w: 0.39, d: 0.40, h: 0.79, kind: 'chair', seat: 'acacia', legs: 'steel',
+    type: 'chair', access: 'chair', url: IK + 'taernoe-stuhl-aussen-faltbar-schwarz-hellbraun-lasiert-90095428/' },
+  // Galaxus
+  oklahoma: { name: 'Vasagle Oklahoma Schuhregal', shop: 'Galaxus', price: 36.90, w: 0.75, d: 0.28, h: 0.93, kind: 'rack', mat: 'white', frame: 'steel',
+    clear: { front: [0.6, 0.7] }, access: 'front', url: 'https://www.galaxus.ch/de/search?q=Vasagle%20Oklahoma' },
+  legenborn: { name: 'vidaXL Legenborn 140 + Matratze', shop: 'Galaxus', price: 455.01, w: 1.45, d: 2.18, h: 0.745, kind: 'bed', mat: 'fabricDark',
+    frameH: 0.30, footH: 0.30, mattress: [1.40, 2.00, 0.20], clear: { sides: [0.6, 0.7], foot: [0.6, 0.7] }, access: 'bed',
+    url: 'https://www.galaxus.ch/en/s14/product/vidaxl-legenborn-140-x-200-cm-bed-43480100' },
+  caleb: { name: 'Skye Decor Caleb Nachttisch', shop: 'Galaxus', price: 26.90, w: 0.25, d: 0.27, h: 0.60, kind: 'cabinet', mat: 'woodLight', fronts: [1],
+    legs: 0.12, type: 'nightstand', url: 'https://www.galaxus.ch/de/search?q=Skye%20Decor%20Caleb' },
+  ingrid: { name: 'Songmics Ingrid Kommode', shop: 'Galaxus', price: 49.50, w: 0.988, d: 0.30, h: 0.737, kind: 'fabricDrawers', mat: 'fabricBrown', frame: 'steel',
+    clear: { front: [0.6, 0.8] }, access: 'front', url: 'https://www.galaxus.ch/de/search?q=Songmics%20Ingrid' },
+  bianca: { name: 'Songmics Bianca TV-Möbel', shop: 'Galaxus', price: 64.00, w: 1.20, d: 0.40, h: 0.495, kind: 'cabinet', mat: 'white', fronts: [1, 1],
+    legs: 0.12, legMat: 'rubberwood', tv: true, access: 'any', url: 'https://www.galaxus.ch/de/search?q=Songmics%20Bianca%20TV' },
+  vasagleRound: { name: 'Vasagle Couchtisch rund', shop: 'Galaxus', price: 101.00, w: 0.80, d: 0.80, h: 0.45, kind: 'roundTable', top: 'oak', legs: 'steel',
+    type: 'table', url: 'https://www.galaxus.ch/de/s14/product/vasagle-couchtisch-80-x-80-x-45-cm-couchtisch-beistelltisch-67117474' },
+  paleseBench: { name: 'tectake Palese Bank', note: 'Masse geschätzt', shop: 'Galaxus', price: 130.90, w: 1.15, d: 0.60, h: 0.70, kind: 'lounge', mat: 'rattan',
+    type: 'chair', access: 'chair', url: 'https://www.galaxus.ch/de/s4/product/tectake-rattan-gartenset-palese-fuer-4-personen-gartenlounge-54773834' },
+  paleseChair: { name: 'tectake Palese Sessel', note: 'im Set, Masse geschätzt', shop: 'Galaxus', price: 0, w: 0.60, d: 0.60, h: 0.70, kind: 'lounge', mat: 'rattan',
+    type: 'chair', access: 'chair' },
+  paleseTable: { name: 'tectake Palese Tisch', note: 'im Set, Masse geschätzt', shop: 'Galaxus', price: 0, w: 0.60, d: 0.60, h: 0.38, kind: 'loungeTable', mat: 'rattan',
+    type: 'table' },
+};
+
+const SHARED = [
+  { id: 'sofa', cat: 'sofa', x: 4.35, z: 3.295, rot: 0 },
+  { id: 'esstisch', cat: 'diningTable', x: 7.40, z: 3.59, rot: 90 },
+  { id: 'stuhl1', cat: 'diningChair', x: 6.74, z: 3.25, rot: 90 },
+  { id: 'stuhl2', cat: 'diningChair', x: 6.74, z: 3.93, rot: 90 },
+  { id: 'stuhl3', cat: 'diningChair', x: 7.40, z: 2.63, rot: 0 },
+  { id: 'stuhl4', cat: 'diningChair', x: 7.40, z: 4.55, rot: 180 },
+];
+const DEFAULTS = {
+  ikea: [
+    ...SHARED,
+    { id: 'schuh', cat: 'bissa', x: 7.99, z: 5.40, rot: -90 },
+    { id: 'bett', cat: 'slattum', x: 2.27, z: 8.62, rot: 180 },
+    { id: 'nacht', cat: 'kullen', x: 1.30, z: 9.45, rot: 180 },
+    { id: 'kommode', cat: 'malm3', x: 3.91, z: 7.00, rot: -90 },
+    { id: 'tv', cat: 'kallax', x: 4.35, z: 5.235, rot: 180 },
+    { id: 'couchtisch', cat: 'vitteryd', x: 4.35, z: 4.42, rot: 0 },
+    { id: 'btisch', cat: 'tarnoTable', x: 1.00, z: 3.30, rot: 0 },
+    { id: 'bstuhl1', cat: 'tarnoChair', x: 1.00, z: 2.83, rot: 0 },
+    { id: 'bstuhl2', cat: 'tarnoChair', x: 1.00, z: 3.77, rot: 180 },
+    { id: 'bstuhl3', cat: 'tarnoChairX', x: 1.47, z: 3.30, rot: -90 },
+  ],
+  galaxus: [
+    ...SHARED,
+    { id: 'schuh', cat: 'oklahoma', x: 7.99, z: 5.40, rot: -90 },
+    { id: 'bett', cat: 'legenborn', x: 2.27, z: 8.56, rot: 180 },
+    { id: 'nacht', cat: 'caleb', x: 1.38, z: 9.515, rot: 180 },
+    { id: 'kommode', cat: 'ingrid', x: 4.00, z: 7.00, rot: -90 },
+    { id: 'tv', cat: 'bianca', x: 4.35, z: 5.23, rot: 180 },
+    { id: 'couchtisch', cat: 'vasagleRound', x: 4.35, z: 4.46, rot: 0 },
+    { id: 'bbank', cat: 'paleseBench', x: 0.42, z: 3.30, rot: 90 },
+    { id: 'btisch', cat: 'paleseTable', x: 1.12, z: 3.30, rot: 0 },
+    { id: 'bsessel1', cat: 'paleseChair', x: 1.12, z: 2.55, rot: 0 },
+    { id: 'bsessel2', cat: 'paleseChair', x: 1.12, z: 4.05, rot: 180 },
+  ],
+};
+
+// ---------------------------------------------------------------------------
+// Zustand (localStorage nur als Komfort)
+// ---------------------------------------------------------------------------
+const STORE = 'kesslerplatz-3d-v1';
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(STORE)) || {}; } catch (e) { saved = {}; }
+const state = {
+  variant: saved.variant === 'galaxus' ? 'galaxus' : 'ikea',
+  view: 'orbit',
+  layouts: { ikea: {}, galaxus: {} },
+  toggles: Object.assign({ labels: true, dist: true, paths: false, low: false }, saved.toggles || {}),
+};
+for (const v of ['ikea', 'galaxus']) {
+  for (const d of DEFAULTS[v]) {
+    const s = saved.layouts && saved.layouts[v] && saved.layouts[v][d.id];
+    state.layouts[v][d.id] = s && typeof s.x === 'number' ? { ...s } : { x: d.x, z: d.z, rot: d.rot, on: true };
+  }
+}
+const persist = () => {
+  try { localStorage.setItem(STORE, JSON.stringify({ variant: state.variant, layouts: state.layouts, toggles: state.toggles })); } catch (e) {}
+};
+
+// ---------------------------------------------------------------------------
+// Three.js Grundgerüst
+// ---------------------------------------------------------------------------
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+stage.appendChild(renderer.domElement);
+
+const labelRenderer = new CSS2DRenderer({ element: document.getElementById('labels') });
+labelRenderer.setSize(innerWidth, innerHeight);
+
+const scene = new THREE.Scene();
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+scene.background = new THREE.Color(dark ? 0x1c1a17 : 0xece7de);
+
+const CENTER = new THREE.Vector3(4.27, 0, 4.95);
+const persp = new THREE.PerspectiveCamera(48, innerWidth / innerHeight, 0.05, 200);
+persp.position.set(4.3, 11.5, 15.5);
+const ortho = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
+ortho.position.set(CENTER.x, 40, CENTER.z);
+ortho.up.set(0, 0, -1);
+ortho.lookAt(CENTER.x, 0, CENTER.z);
+const egoCam = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.05, 100);
+egoCam.rotation.order = 'YXZ';
+
+const orbit = new OrbitControls(persp, renderer.domElement);
+orbit.target.copy(CENTER);
+orbit.enableDamping = true;
+orbit.maxPolarAngle = Math.PI * 0.49;
+orbit.minDistance = 2; orbit.maxDistance = 40;
+const topCtl = new OrbitControls(ortho, renderer.domElement);
+topCtl.target.copy(CENTER);
+topCtl.enableRotate = false;
+topCtl.screenSpacePanning = true;
+topCtl.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN };
+topCtl.touches = { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN };
+topCtl.minZoom = 0.5; topCtl.maxZoom = 6;
+topCtl.enabled = false;
+const ego = new PointerLockControls(egoCam, renderer.domElement);
+
+function fitOrtho() {
+  const a = innerWidth / innerHeight, span = 11.2;
+  const hh = a > 0.9 ? span / 2 : (span / a) / 2;
+  ortho.left = -hh * a; ortho.right = hh * a; ortho.top = hh; ortho.bottom = -hh;
+  ortho.updateProjectionMatrix();
+}
+fitOrtho();
+
+scene.add(new THREE.HemisphereLight(0xfffaf0, 0xb8ad9c, 1.25));
+scene.add(new THREE.AmbientLight(0xfff6ea, 0.35));
+const sun = new THREE.DirectionalLight(0xfff1dc, 1.6);
+sun.position.set(-3, 14, 3);
+sun.target.position.copy(CENTER);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 40 });
+sun.shadow.bias = -0.0004;
+scene.add(sun, sun.target);
+
+// ---------------------------------------------------------------------------
+// Materialien (prozedurale Texturen, keine externen Dateien)
+// ---------------------------------------------------------------------------
+function canvasTex(size, draw, repeat = 1) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  draw(c.getContext('2d'), size);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace;
+  t.repeat.set(repeat, repeat); t.anisotropy = 4;
+  return t;
+}
+let seed = 7;
+const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const grainTex = canvasTex(256, (g, s) => {
+  g.fillStyle = '#fff'; g.fillRect(0, 0, s, s);
+  for (let i = 0; i < 140; i++) {
+    g.strokeStyle = `rgba(110,80,50,${0.04 + rnd() * 0.10})`; g.lineWidth = 0.5 + rnd() * 1.8;
+    g.beginPath(); const y = rnd() * s; g.moveTo(0, y);
+    for (let x = 0; x <= s; x += 16) g.lineTo(x, y + Math.sin(x * 0.03 + i) * 2.5);
+    g.stroke();
+  }
+});
+const fabricTex = canvasTex(128, (g, s) => {
+  g.fillStyle = '#fff'; g.fillRect(0, 0, s, s);
+  for (let i = 0; i < 2600; i++) { g.fillStyle = `rgba(0,0,0,${rnd() * 0.07})`; g.fillRect(rnd() * s, rnd() * s, 1.5, 1.5); }
+}, 2);
+const parquetTex = canvasTex(512, (g, s) => {
+  const pw = s / 4, pl = s / 1.5;
+  for (let col = 0; col < 4; col++) {
+    let y = -rnd() * pl;
+    while (y < s) {
+      const l = pl * (0.6 + rnd() * 0.6), v = 200 + rnd() * 30;
+      g.fillStyle = `rgb(${v + 22},${v + 2},${v - 34})`; g.fillRect(col * pw, y, pw, l);
+      for (let k = 0; k < 6; k++) { g.strokeStyle = `rgba(120,85,50,${rnd() * 0.12})`; g.beginPath(); const xx = col * pw + rnd() * pw; g.moveTo(xx, y); g.lineTo(xx + rnd() * 3, y + l); g.stroke(); }
+      g.strokeStyle = 'rgba(90,65,40,.35)'; g.strokeRect(col * pw + .5, y + .5, pw - 1, l - 1);
+      y += l;
+    }
+  }
+});
+const tileTex = canvasTex(256, (g, s) => {
+  g.fillStyle = '#d9d6d0'; g.fillRect(0, 0, s, s);
+  g.strokeStyle = '#b9b5ae'; g.lineWidth = 2;
+  for (let i = 0; i <= 4; i++) { g.beginPath(); g.moveTo(i * s / 4, 0); g.lineTo(i * s / 4, s); g.moveTo(0, i * s / 4); g.lineTo(s, i * s / 4); g.stroke(); }
+});
+const deckTex = canvasTex(256, (g, s) => {
+  g.fillStyle = '#b9b3aa'; g.fillRect(0, 0, s, s);
+  g.strokeStyle = '#9d968c'; g.lineWidth = 2;
+  for (let i = 0; i <= 2; i++) { g.beginPath(); g.moveTo(0, i * s / 2); g.lineTo(s, i * s / 2); g.moveTo(i * s / 2, 0); g.lineTo(i * s / 2, s); g.stroke(); }
+});
+
+const M = (color, opts = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.75, metalness: 0, ...opts });
+const MAT = {
+  oak: M(0xd8bb90, { map: grainTex, roughness: 0.6 }),
+  woodLight: M(0xcfae84, { map: grainTex, roughness: 0.6 }),
+  acacia: M(0xa8764a, { map: grainTex, roughness: 0.65 }),
+  rubberwood: M(0xc9a57a, { map: grainTex }),
+  blackBrown: M(0x3b322c, { map: grainTex, roughness: 0.55 }),
+  white: M(0xf1eee8, { roughness: 0.5 }),
+  black: M(0x2a2826, { roughness: 0.5 }),
+  steel: M(0x1f1f1f, { roughness: 0.4, metalness: 0.5 }),
+  fabricBeige: M(0xd8cdbb, { map: fabricTex, roughness: 0.95 }),
+  fabricGrey: M(0x62666a, { map: fabricTex, roughness: 0.95 }),
+  fabricDark: M(0x55585b, { map: fabricTex, roughness: 0.95 }),
+  fabricBrown: M(0x6b5641, { map: fabricTex, roughness: 0.95 }),
+  cushion: M(0xd9d1c2, { map: fabricTex, roughness: 0.95 }),
+  linen: M(0xe9e1d3, { map: fabricTex, roughness: 0.95 }),
+  mattress: M(0xf4f1ea, { map: fabricTex, roughness: 0.9 }),
+  rattan: M(0x6f6a63, { map: fabricTex, roughness: 0.9 }),
+  glass: new THREE.MeshPhysicalMaterial({ color: 0xcfe3ea, transparent: true, opacity: 0.28, roughness: 0.05, transmission: 0, depthWrite: false }),
+  screen: M(0x111214, { roughness: 0.25, metalness: 0.2 }),
+  wall: M(0xf3efe8, { roughness: 0.9 }),
+  wallTop: M(0x48423b, { roughness: 0.9 }),
+  kitchenFront: M(0xe8e4dc, { roughness: 0.5 }),
+  worktop: M(0x3b3b3b, { roughness: 0.4 }),
+  sanitary: M(0xfbfbfb, { roughness: 0.25 }),
+  railing: M(0x3a3a3a, { roughness: 0.4, metalness: 0.4 }),
+  doorLeaf: M(0xf7f5f0, { roughness: 0.5 }),
+  frame: M(0x8a8580, { roughness: 0.5 }),
+};
+const floorMat = {
+  parquet: M(0xffffff, { map: parquetTex, roughness: 0.7 }),
+  tile: M(0xffffff, { map: tileTex, roughness: 0.6 }),
+  deck: M(0xffffff, { map: deckTex, roughness: 0.9 }),
+};
+
+function box(w, h, d, mat, x = 0, y = 0, z = 0) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  m.position.set(x, y + h / 2, z);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function cyl(r, h, mat, x = 0, y = 0, z = 0) {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 40), mat);
+  m.position.set(x, y + h / 2, z);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function label(html, cls = '') {
+  const el = document.createElement('div');
+  el.className = 'lbl ' + cls; el.innerHTML = html;
+  return new CSS2DObject(el);
+}
+
+// ---------------------------------------------------------------------------
+// Gebäude
+// ---------------------------------------------------------------------------
+const building = new THREE.Group(); scene.add(building);
+const wallGroup = new THREE.Group(); scene.add(wallGroup);
+const roomLabels = new THREE.Group(); scene.add(roomLabels);
+const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(8.54, 9.88), M(0xfbfaf7, { side: THREE.DoubleSide }));
+ceiling.rotation.x = Math.PI / 2; ceiling.position.set(4.27, H, 4.94); ceiling.visible = false;
+scene.add(ceiling);
+
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), M(dark ? 0x2a2723 : 0xe2dcd1, { roughness: 1 }));
+ground.rotation.x = -Math.PI / 2; ground.position.set(CENTER.x, -0.02, CENTER.z); ground.receiveShadow = true;
+building.add(ground);
+
+for (const r of ROOMS) {
+  if (!r.floor) continue;
+  const [x0, z0, x1, z1] = r.r, w = x1 - x0, d = z1 - z0;
+  const mat = floorMat[r.floor].clone();
+  mat.map = mat.map.clone(); mat.map.needsUpdate = true;
+  const rep = r.floor === 'parquet' ? 1.6 : r.floor === 'tile' ? 1.2 : 1.0;
+  mat.map.repeat.set(w / rep, d / rep);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), mat);
+  m.rotation.x = -Math.PI / 2; m.position.set(x0 + w / 2, r.floor === 'deck' ? -0.005 : 0, z0 + d / 2);
+  m.receiveShadow = true; building.add(m);
+}
+for (const r of ROOMS) {
+  const l = label(r.name, 'room'); l.position.set(r.label[0], r.high ? 2.6 : 0.02, r.label[1]); roomLabels.add(l);
+}
+
+function wallPiece(x0, z0, x1, z1, y0, y1, top = true) {
+  const w = x1 - x0, d = z1 - z0, h = y1 - y0;
+  const mats = [MAT.wall, MAT.wall, top ? MAT.wallTop : MAT.wall, MAT.wall, MAT.wall, MAT.wall];
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mats);
+  m.position.set(x0 + w / 2, y0 + h / 2, z0 + d / 2);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function buildWalls(low) {
+  wallGroup.clear();
+  const top = low ? 1.1 : H;
+  for (const [x0, z0, x1, z1] of WALLS) wallGroup.add(wallPiece(x0, z0, x1, z1, 0, top));
+  for (const o of OPENINGS) {
+    const [x0, z0, x1, z1] = o.r;
+    if (!low && o.head < H) wallGroup.add(wallPiece(x0, z0, x1, z1, o.head, H));
+    if (o.kind === 'window' || o.kind === 'slide') {
+      const thinX = x1 - x0 < z1 - z0;
+      const gx0 = thinX ? (x0 + x1) / 2 - 0.015 : x0, gx1 = thinX ? (x0 + x1) / 2 + 0.015 : x1;
+      const gz0 = thinX ? z0 : (z0 + z1) / 2 - 0.015, gz1 = thinX ? z1 : (z0 + z1) / 2 + 0.015;
+      const gh = (low ? Math.min(top, o.head) : o.head) - (o.sill || 0);
+      const glass = new THREE.Mesh(new THREE.BoxGeometry(gx1 - gx0, gh, gz1 - gz0), MAT.glass);
+      glass.position.set((gx0 + gx1) / 2, (o.sill || 0) + gh / 2, (gz0 + gz1) / 2);
+      if (o.kind === 'slide') { // Schiebeflügel: ganz offen, vor dem Fixteil geparkt
+        glass.position.z = z1 + (z1 - z0) / 2; glass.position.x -= 0.06;
+      }
+      wallGroup.add(glass);
+      // Rahmen unten/oben
+      wallGroup.add(Object.assign(box(gx1 - gx0 + 0.02, 0.04, gz1 - gz0 + 0.02, MAT.frame, (gx0 + gx1) / 2, 0, (gz0 + gz1) / 2), { castShadow: false }));
+    }
+  }
+  for (const [x0, z0, x1, z1] of RAILINGS) {
+    wallGroup.add(box(x1 - x0, 0.04, z1 - z0, MAT.railing, (x0 + x1) / 2, 1.0, (z0 + z1) / 2));
+    const g = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.95, z1 - z0), MAT.glass);
+    g.position.set((x0 + x1) / 2, 0.5, (z0 + z1) / 2); wallGroup.add(g);
+  }
+  for (const b of BUILTINS) {
+    const [x0, z0, x1, z1] = b.r, w = x1 - x0, d = z1 - z0;
+    let y1 = b.y1;
+    if (low && b.y0 >= top) continue;
+    if (low) y1 = Math.min(y1, top);
+    const mat = b.kind === 'sanitary' ? MAT.sanitary : b.kind === 'wallLow' ? MAT.wall : MAT.kitchenFront;
+    const m = box(w, y1 - b.y0, d, mat, x0 + w / 2, b.y0, z0 + d / 2);
+    wallGroup.add(m);
+    if (b.kind === 'base') {
+      wallGroup.add(box(w, 0.04, d + 0.02, MAT.worktop, x0 + w / 2, 0.9, z0 + d / 2 + 0.01));
+      wallGroup.add(box(0.5, 0.01, 0.4, MAT.steel, 6.30, 0.94, 0.55));   // Spüle
+      wallGroup.add(box(0.58, 0.01, 0.5, MAT.screen, 7.50, 0.94, 0.55));  // Kochfeld
+    }
+    if (b.kind === 'tall' || b.kind === 'base' || b.kind === 'upper') {
+      const n = Math.max(1, Math.round(w / 0.6));
+      for (let i = 1; i < n; i++) wallGroup.add(box(0.006, y1 - b.y0 - 0.04, 0.005, MAT.frame, x0 + i * w / n, b.y0 + 0.02, z1 + 0.003));
+    }
+  }
+  // Türen: Flügel offen + Aufschlagbereich
+  for (const dr of DOORS) {
+    const [hx, hz] = dr.hinge, [ox, oz] = dr.open;
+    const leaf = box(Math.abs(ox) ? dr.w : 0.04, Math.min(DOOR_H, top) - 0.01, Math.abs(oz) ? dr.w : 0.04, MAT.doorLeaf,
+      hx + ox * dr.w / 2, 0.005, hz + oz * dr.w / 2);
+    wallGroup.add(leaf);
+    const a0 = Math.atan2(dr.closed[1], dr.closed[0]), a1 = Math.atan2(oz, ox);
+    let da = a1 - a0; if (da > Math.PI) da -= 2 * Math.PI; if (da < -Math.PI) da += 2 * Math.PI;
+    const shape = new THREE.Shape(); shape.moveTo(0, 0);
+    for (let i = 0; i <= 24; i++) { const a = a0 + da * i / 24; shape.lineTo(Math.cos(a) * dr.w, Math.sin(a) * dr.w); }
+    const sg = new THREE.ShapeGeometry(shape);
+    sg.rotateX(Math.PI / 2); // Shape (x, y) -> Welt (x, z)
+    const sm = new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ color: 0xe0a24a, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
+    sm.position.set(hx, 0.008, hz); wallGroup.add(sm);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Möbel-Bauteile
+// ---------------------------------------------------------------------------
+function legs4(g, w, d, h, mat, t = 0.035, inset = 0.03) {
+  for (const sx of [-1, 1]) for (const sz of [-1, 1])
+    g.add(box(t, h, t, mat, sx * (w / 2 - inset - t / 2), 0, sz * (d / 2 - inset - t / 2)));
+}
+const BUILD = {
+  cabinet(c) {
+    const g = new THREE.Group(), body = MAT[c.mat], legH = c.legs || 0.02;
+    const fd = 0.018, bh = c.h - legH;
+    g.add(box(c.w, bh, c.d - fd, body, 0, legH, -fd / 2));
+    const n = c.fronts.length, gap = 0.006;
+    for (let i = 0; i < n; i++) {
+      const ph = bh / n;
+      g.add(box(c.w - 0.01, ph - gap, fd, body, 0, legH + i * ph + gap / 2, c.d / 2 - fd / 2));
+      g.add(box(Math.min(0.12, c.w * 0.3), 0.012, 0.012, MAT.steel, 0, legH + i * ph + ph * 0.72, c.d / 2 + 0.006));
+    }
+    if (c.legs) legs4(g, c.w, c.d, legH, MAT[c.legMat || 'steel'], 0.03, 0.03);
+    else g.add(box(c.w - 0.04, legH, c.d - 0.06, MAT.black, 0, 0, 0));
+    if (c.tv) addTV(g, c);
+    return g;
+  },
+  kallax(c) {
+    const g = new THREE.Group(), m = MAT[c.mat], t = 0.039;
+    g.add(box(c.w, t, c.d, m, 0, c.h - t, 0));       // Deckplatte
+    g.add(box(c.w, t, c.d, m, 0, 0.02, 0));          // Boden
+    g.add(box(t, c.h - 0.02, c.d, m, -c.w / 2 + t / 2, 0.02, 0));
+    g.add(box(t, c.h - 0.02, c.d, m, c.w / 2 - t / 2, 0.02, 0));
+    g.add(box(t, c.h - 0.06, c.d, m, c.w * 0.17, 0.02, 0)); // Trennwand
+    g.add(box(c.w * 0.33 - t, t, c.d, m, c.w * 0.34, c.h / 2, 0)); // Fachboden rechts
+    g.add(box(c.w - 0.02, c.h - 0.06, 0.01, MAT.black, 0, 0.03, -c.d / 2 + 0.005)); // Rückwand
+    addTV(g, c);
+    return g;
+  },
+  rack(c) {
+    const g = new THREE.Group(), fr = MAT[c.frame];
+    g.add(box(c.w, 0.02, c.d, MAT[c.mat], 0, c.h - 0.02, 0));
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(box(0.02, c.h - 0.02, 0.02, fr, sx * (c.w / 2 - 0.01), 0, sz * (c.d / 2 - 0.01)));
+    for (let i = 0; i < 4; i++) {
+      const s = box(c.w - 0.04, 0.012, c.d - 0.03, fr, 0, 0.06 + i * 0.2, 0);
+      s.rotation.x = -0.18; g.add(s);
+    }
+    return g;
+  },
+  fabricDrawers(c) {
+    const g = new THREE.Group(), fr = MAT[c.frame];
+    g.add(box(c.w, 0.02, c.d, MAT.woodLight, 0, c.h - 0.02, 0));
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(box(0.02, c.h - 0.02, 0.02, fr, sx * (c.w / 2 - 0.01), 0, sz * (c.d / 2 - 0.01)));
+    const rows = [2, 2, 3], rh = (c.h - 0.12) / rows.length;
+    rows.forEach((n, r) => {
+      for (let i = 0; i < n; i++) {
+        const cw = (c.w - 0.06) / n;
+        g.add(box(cw - 0.02, rh - 0.02, c.d - 0.04, MAT[c.mat], -c.w / 2 + 0.03 + cw * (i + 0.5), 0.08 + r * rh, 0));
+      }
+    });
+    return g;
+  },
+  bed(c) {
+    const g = new THREE.Group(), m = MAT[c.mat];
+    const [mw, ml, mh] = c.mattress;
+    g.add(box(c.w, c.frameH - 0.06, c.d - 0.1, m, 0, 0.06, 0.02));
+    legs4(g, c.w, c.d - 0.1, 0.06, MAT.black, 0.05, 0.05);
+    g.add(box(c.w, c.h, 0.09, m, 0, 0, -c.d / 2 + 0.045));          // Kopfteil
+    g.add(box(c.w, c.footH, 0.05, m, 0, 0, c.d / 2 - 0.025));        // Fussteil
+    const mz = -c.d / 2 + 0.09 + ml / 2 + 0.005;
+    g.add(box(mw, mh, ml, MAT.mattress, 0, c.frameH - 0.04, mz));
+    const top = c.frameH - 0.04 + mh;
+    for (const sx of [-1, 1]) {
+      const p = box(mw * 0.42, 0.12, 0.42, MAT.linen, sx * mw * 0.24, top, mz - ml / 2 + 0.28);
+      g.add(p);
+    }
+    g.add(box(mw + 0.04, 0.05, ml * 0.62, MAT.linen, 0, top, mz + ml * 0.19));
+    return g;
+  },
+  sofa(c) {
+    const g = new THREE.Group(), m = MAT[c.mat];
+    g.add(box(c.w, 0.24, c.d - 0.06, m, 0, 0.0, 0.03));
+    const n = 3, sw = (c.w - 0.14) / n;
+    for (let i = 0; i < n; i++) g.add(box(sw - 0.015, 0.16, c.d - 0.26, m, -c.w / 2 + 0.07 + sw * (i + 0.5), 0.24, 0.09));
+    g.add(box(c.w, 0.69, 0.18, m, 0, 0.0, -c.d / 2 + 0.09));
+    for (let i = 0; i < n; i++) {
+      const b = box(sw - 0.02, 0.42, 0.16, m, -c.w / 2 + 0.07 + sw * (i + 0.5), 0.40, -c.d / 2 + 0.25);
+      b.rotation.x = -0.12; g.add(b);
+    }
+    for (const sx of [-1, 1]) g.add(box(0.06, 0.55, c.d, m, sx * (c.w / 2 - 0.03), 0, 0));
+    return g;
+  },
+  table(c) {
+    const g = new THREE.Group();
+    g.add(box(c.w, 0.03, c.d, MAT[c.top], 0, c.h - 0.03, 0));
+    legs4(g, c.w, c.d, c.h - 0.03, MAT[c.legs], 0.045, 0.04);
+    return g;
+  },
+  roundTable(c) {
+    const g = new THREE.Group(), r = c.w / 2;
+    g.add(cyl(r, 0.025, MAT[c.top], 0, c.h - 0.025, 0));
+    g.add(cyl(r * 0.85, 0.018, MAT[c.top], 0, 0.12, 0));
+    for (let i = 0; i < 4; i++) {
+      const a = i * Math.PI / 2 + Math.PI / 4;
+      g.add(box(0.025, c.h - 0.025, 0.025, MAT[c.legs], Math.cos(a) * r * 0.72, 0, Math.sin(a) * r * 0.72));
+    }
+    return g;
+  },
+  vitteryd(c) {
+    const g = new THREE.Group(), m = MAT[c.mat];
+    g.add(box(c.w, 0.025, c.d, m, 0, c.h - 0.025, 0));
+    g.add(box(c.w - 0.04, 0.02, c.d - 0.06, m, 0, 0.12, 0));
+    for (const sx of [-1, 1]) g.add(box(0.025, c.h - 0.025, c.d - 0.02, m, sx * (c.w / 2 - 0.0125), 0, 0));
+    return g;
+  },
+  chair(c) {
+    const g = new THREE.Group(), sh = 0.45;
+    g.add(box(c.w, 0.03, c.d * 0.85, MAT[c.seat], 0, sh - 0.03, 0.03));
+    legs4(g, c.w, c.d * 0.85, sh - 0.03, MAT[c.legs], 0.025, 0.02);
+    g.add(box(c.w, c.h - sh, 0.025, MAT[c.seat], 0, sh, -c.d / 2 + 0.03));
+    g.add(box(0.025, c.h, 0.025, MAT[c.legs], -c.w / 2 + 0.0125, 0, -c.d / 2 + 0.02));
+    g.add(box(0.025, c.h, 0.025, MAT[c.legs], c.w / 2 - 0.0125, 0, -c.d / 2 + 0.02));
+    if (c.cushion) g.add(box(c.w - 0.04, 0.04, c.d * 0.7, MAT[c.cushion], 0, sh, 0.05));
+    return g;
+  },
+  lounge(c) {
+    const g = new THREE.Group(), m = MAT[c.mat];
+    g.add(box(c.w, 0.32, c.d, m, 0, 0, 0));
+    g.add(box(c.w - 0.12, 0.09, c.d - 0.14, MAT.cushion, 0, 0.32, 0.05));
+    g.add(box(c.w, c.h - 0.32, 0.12, m, 0, 0.32, -c.d / 2 + 0.06));
+    for (const sx of [-1, 1]) g.add(box(0.06, 0.2, c.d - 0.12, m, sx * (c.w / 2 - 0.03), 0.32, 0.06));
+    return g;
+  },
+  loungeTable(c) {
+    const g = new THREE.Group();
+    g.add(box(c.w, c.h - 0.01, c.d, MAT[c.mat], 0, 0, 0));
+    g.add(box(c.w - 0.04, 0.01, c.d - 0.04, MAT.glass, 0, c.h - 0.01, 0));
+    return g;
+  },
+};
+function addTV(g, c) {
+  const tw = 1.23, th = 0.71;
+  g.add(box(0.25, 0.02, 0.18, MAT.steel, 0, c.h, 0));
+  g.add(box(0.05, 0.08, 0.04, MAT.steel, 0, c.h + 0.02, 0));
+  g.add(box(tw, th, 0.03, MAT.screen, 0, c.h + 0.08, 0));
+}
+
+// ---------------------------------------------------------------------------
+// Möbel-Instanzen
+// ---------------------------------------------------------------------------
+const furnRoot = new THREE.Group(); scene.add(furnRoot);
+const items = { ikea: {}, galaxus: {} };   // id -> { id, cat, c, group, lbl, edges, foot }
+for (const v of ['ikea', 'galaxus']) {
+  for (const d of DEFAULTS[v]) {
+    const c = CAT[d.cat];
+    const group = new THREE.Group();
+    const mesh = BUILD[c.kind](c);
+    group.add(mesh);
+    group.userData.fid = d.id;
+    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(c.w + 0.02, c.h + 0.02, c.d + 0.02)),
+      new THREE.LineBasicMaterial({ color: 0x4c5a2f }));
+    edges.position.y = c.h / 2; edges.visible = false; group.add(edges);
+    const foot = new THREE.Mesh(new THREE.PlaneGeometry(c.w, c.d), new THREE.MeshBasicMaterial({ color: 0xc0392b, transparent: true, opacity: 0, depthWrite: false }));
+    foot.rotation.x = -Math.PI / 2; foot.position.y = 0.012; group.add(foot);
+    const lbl = label(`<b>${c.name}</b><br><small>${Math.round(c.w * 100)} × ${Math.round(c.d * 100)} × ${Math.round(c.h * 100)} cm</small>`);
+    lbl.position.set(0, c.h + (c.tv ? 0.85 : 0.12), 0); group.add(lbl);
+    furnRoot.add(group);
+    items[v][d.id] = { id: d.id, cat: d.cat, c, group, lbl, edges, foot };
+  }
+}
+function applyTransform(it, s) {
+  it.group.position.set(s.x, 0, s.z);
+  it.group.rotation.y = THREE.MathUtils.degToRad(s.rot);
+  it.group.visible = s.on && true;
+}
+function syncVariant() {
+  for (const v of ['ikea', 'galaxus']) for (const id in items[v]) {
+    const it = items[v][id], s = state.layouts[v][id];
+    applyTransform(it, s);
+    if (v !== state.variant) it.group.visible = false;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Geometrie für Konfliktprüfung (2D, SAT auf konvexen Polygonen)
+// ---------------------------------------------------------------------------
+const rectPoly = ([x0, z0, x1, z1]) => [[x0, z0], [x1, z0], [x1, z1], [x0, z1]];
+function obbPoly(cx, cz, w, d, rotDeg, lx0 = -w / 2, lz0 = -d / 2, lx1 = w / 2, lz1 = d / 2) {
+  const t = THREE.MathUtils.degToRad(rotDeg), c = Math.cos(t), s = Math.sin(t);
+  return [[lx0, lz0], [lx1, lz0], [lx1, lz1], [lx0, lz1]].map(([x, z]) => [cx + x * c + z * s, cz - x * s + z * c]);
+}
+function localToWorld(cx, cz, rotDeg, x, z) {
+  const t = THREE.MathUtils.degToRad(rotDeg), c = Math.cos(t), s = Math.sin(t);
+  return [cx + x * c + z * s, cz - x * s + z * c];
+}
+function overlap(a, b, eps = 0.003) {
+  for (const poly of [a, b]) {
+    for (let i = 0; i < poly.length; i++) {
+      const [x1, z1] = poly[i], [x2, z2] = poly[(i + 1) % poly.length];
+      const nx = z2 - z1, nz = x1 - x2, len = Math.hypot(nx, nz); if (len < 1e-9) continue;
+      let amin = Infinity, amax = -Infinity, bmin = Infinity, bmax = -Infinity;
+      for (const [x, z] of a) { const p = (x * nx + z * nz) / len; amin = Math.min(amin, p); amax = Math.max(amax, p); }
+      for (const [x, z] of b) { const p = (x * nx + z * nz) / len; bmin = Math.min(bmin, p); bmax = Math.max(bmax, p); }
+      if (amax - eps <= bmin || bmax - eps <= amin) return false;
+    }
+  }
+  return true;
+}
+function pointInPoly([px, pz], poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, zi] = poly[i], [xj, zj] = poly[j];
+    if ((zi > pz) !== (zj > pz) && px < (xj - xi) * (pz - zi) / (zj - zi) + xi) inside = !inside;
+  }
+  return inside;
+}
+function sectorPoly(dr) {
+  const a0 = Math.atan2(dr.closed[1], dr.closed[0]), a1 = Math.atan2(dr.open[1], dr.open[0]);
+  let da = a1 - a0; if (da > Math.PI) da -= 2 * Math.PI; if (da < -Math.PI) da += 2 * Math.PI;
+  const pts = [[dr.hinge[0], dr.hinge[1]]];
+  for (let i = 0; i <= 8; i++) { const a = a0 + da * i / 8; pts.push([dr.hinge[0] + Math.cos(a) * dr.w, dr.hinge[1] + Math.sin(a) * dr.w]); }
+  return pts;
+}
+// statische Hindernisse auf Bodenhöhe
+const STATIC_OBS = [
+  ...WALLS.map(r => ({ name: 'Wand', poly: rectPoly(r) })),
+  ...OPENINGS.filter(o => o.kind === 'window').map(o => ({ name: 'Fenster', poly: rectPoly(o.r) })),
+  ...RAILINGS.map(r => ({ name: 'Geländer', poly: rectPoly(r) })),
+  ...BUILTINS.filter(b => !b.noFloor).map(b => ({ name: b.name, poly: rectPoly(b.r) })),
+];
+const DOOR_SECTORS = DOORS.map(d => ({ name: d.name, poly: sectorPoly(d) }));
+
+function activeItems() {
+  const v = state.variant;
+  return Object.values(items[v]).filter(it => state.layouts[v][it.id].on);
+}
+function footprint(it) {
+  const s = state.layouts[state.variant][it.id];
+  return obbPoly(s.x, s.z, it.c.w, it.c.d, s.rot);
+}
+const isTuck = (a, b) => (a.c.type === 'chair' && b.c.type === 'table') || (a.c.type === 'table' && b.c.type === 'chair');
+
+// freie Tiefe vor einer Kante: Streifen in lokalen Koordinaten [lx0, lz0, lx1, lz1](depth)
+function freeDepth(stripFn, exclude, maxD = 1.5) {
+  const obs = [...STATIC_OBS.map(o => o.poly), ...activeItems().filter(o => !exclude.has(o.id)).map(footprint)];
+  const hit = d => obs.some(p => overlap(stripFn(d), p, 0.002));
+  if (!hit(maxD)) return maxD;
+  let lo = 0, hi = maxD;
+  for (let i = 0; i < 14; i++) { const mid = (lo + hi) / 2; if (hit(mid)) hi = mid; else lo = mid; }
+  return lo;
+}
+
+// ---------------------------------------------------------------------------
+// Laufwege: Raster 5 cm, begehbar = mind. 30 cm Abstand zu Hindernissen (= 60 cm breiter Weg)
+// ---------------------------------------------------------------------------
+const CELL = 0.05, GX0 = -0.1, GZ0 = -0.1, GW = Math.ceil(8.8 / CELL), GH = Math.ceil(10.1 / CELL);
+function computePaths() {
+  const N = GW * GH, blocked = new Uint8Array(N);
+  const polys = [...STATIC_OBS.map(o => o.poly), ...activeItems().map(footprint)];
+  for (const p of polys) {
+    let minx = Infinity, maxx = -Infinity, minz = Infinity, maxz = -Infinity;
+    for (const [x, z] of p) { minx = Math.min(minx, x); maxx = Math.max(maxx, x); minz = Math.min(minz, z); maxz = Math.max(maxz, z); }
+    const i0 = Math.max(0, Math.floor((minx - GX0) / CELL)), i1 = Math.min(GW - 1, Math.ceil((maxx - GX0) / CELL));
+    const j0 = Math.max(0, Math.floor((minz - GZ0) / CELL)), j1 = Math.min(GH - 1, Math.ceil((maxz - GZ0) / CELL));
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+      const k = j * GW + i; if (blocked[k]) continue;
+      if (pointInPoly([GX0 + (i + 0.5) * CELL, GZ0 + (j + 0.5) * CELL], p)) blocked[k] = 1;
+    }
+  }
+  // ausserhalb der Wohnung (östlich der Fassade) sperren
+  for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++) if (GX0 + (i + 0.5) * CELL > 8.13) blocked[j * GW + i] = 1;
+  // Distanztransformation (Chamfer 1 / √2)
+  const dist = new Float32Array(N);
+  for (let k = 0; k < N; k++) dist[k] = blocked[k] ? 0 : 1e9;
+  const D2 = Math.SQRT2;
+  for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++) {
+    const k = j * GW + i; let v = dist[k];
+    if (i > 0) v = Math.min(v, dist[k - 1] + 1);
+    if (j > 0) { v = Math.min(v, dist[k - GW] + 1); if (i > 0) v = Math.min(v, dist[k - GW - 1] + D2); if (i < GW - 1) v = Math.min(v, dist[k - GW + 1] + D2); }
+    dist[k] = v;
+  }
+  for (let j = GH - 1; j >= 0; j--) for (let i = GW - 1; i >= 0; i--) {
+    const k = j * GW + i; let v = dist[k];
+    if (i < GW - 1) v = Math.min(v, dist[k + 1] + 1);
+    if (j < GH - 1) { v = Math.min(v, dist[k + GW] + 1); if (i < GW - 1) v = Math.min(v, dist[k + GW + 1] + D2); if (i > 0) v = Math.min(v, dist[k + GW - 1] + D2); }
+    dist[k] = v;
+  }
+  const walk = new Uint8Array(N);
+  for (let k = 0; k < N; k++) walk[k] = dist[k] * CELL >= 0.30 - CELL * 0.5 ? 1 : 0;
+  const cellOf = (x, z) => [Math.floor((x - GX0) / CELL), Math.floor((z - GZ0) / CELL)];
+  const nearestWalk = (x, z, rad) => {
+    const [ci, cj] = cellOf(x, z), r = Math.ceil(rad / CELL); let best = -1, bd = Infinity;
+    for (let j = cj - r; j <= cj + r; j++) for (let i = ci - r; i <= ci + r; i++) {
+      if (i < 0 || j < 0 || i >= GW || j >= GH) continue;
+      const k = j * GW + i, dd = (i - ci) ** 2 + (j - cj) ** 2;
+      if (walk[k] && dd <= r * r && dd < bd) { bd = dd; best = k; }
+    }
+    return best;
+  };
+  const start = nearestWalk(ENTRY[0], ENTRY[1], 0.6);
+  const parent = new Int32Array(N).fill(-2);
+  if (start >= 0) {
+    const q = new Int32Array(N); let h = 0, t = 0; q[t++] = start; parent[start] = -1;
+    while (h < t) {
+      const k = q[h++], i = k % GW, j = (k / GW) | 0;
+      for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+        if (!di && !dj) continue;
+        const ni = i + di, nj = j + dj; if (ni < 0 || nj < 0 || ni >= GW || nj >= GH) continue;
+        const nk = nj * GW + ni; if (!walk[nk] || parent[nk] !== -2) continue;
+        if (di && dj && (!walk[j * GW + ni] || !walk[nj * GW + i])) continue;
+        parent[nk] = k; q[t++] = nk;
+      }
+    }
+  }
+  const reach = (x, z, rad = 0.12) => {
+    const [ci, cj] = cellOf(x, z), r = Math.ceil(rad / CELL);
+    for (let j = cj - r; j <= cj + r; j++) for (let i = ci - r; i <= ci + r; i++) {
+      if (i < 0 || j < 0 || i >= GW || j >= GH) continue;
+      const k = j * GW + i; if (parent[k] !== -2) return k;
+    }
+    return -1;
+  };
+  const pathTo = k => { const pts = []; while (k >= 0) { pts.push([GX0 + (k % GW + 0.5) * CELL, GZ0 + (((k / GW) | 0) + 0.5) * CELL]); k = parent[k]; } return pts; };
+  return { walk, parent, reach, pathTo, start };
+}
+
+function accessPoints(it) {
+  const s = state.layouts[state.variant][it.id], c = it.c, o = 0.32;
+  const P = (x, z) => localToWorld(s.x, s.z, s.rot, x, z);
+  switch (c.access) {
+    case 'front': return [P(0, c.d / 2 + o)];
+    case 'bed': return [P(-c.w / 2 - o, 0.1), P(c.w / 2 + o, 0.1)];
+    case 'sofa': return [P(0, c.d / 2 + o), P(-c.w / 2 - o, c.d / 4), P(c.w / 2 + o, c.d / 4)];
+    case 'chair': return [P(0, -c.d / 2 - o), P(-c.w / 2 - o, 0), P(c.w / 2 + o, 0)];
+    case 'any': return [P(0, c.d / 2 + o), P(-c.w / 2 - o, 0), P(c.w / 2 + o, 0)];
+    default: return [];
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Auswertung
+// ---------------------------------------------------------------------------
+const overlayRoot = new THREE.Group(); scene.add(overlayRoot);
+const pathRoot = new THREE.Group(); scene.add(pathRoot);
+let lastPaths = null, issues = [], sevById = {};
+const SEV_RANK = { red: 2, amber: 1 };
+const cm = v => Math.round(v * 100);
+
+function evaluate(withPaths = true) {
+  issues = []; sevById = {};
+  const add = (sev, text, ids = []) => {
+    issues.push({ sev, text, ids });
+    for (const id of ids) if (!sevById[id] || SEV_RANK[sev] > SEV_RANK[sevById[id]]) sevById[id] = sev;
+  };
+  const act = activeItems();
+  const fp = Object.fromEntries(act.map(it => [it.id, footprint(it)]));
+  const roomPolys = ROOMS.filter(r => r.floor).map(r => rectPoly(r.r));
+
+  for (const it of act) {
+    const s = state.layouts[state.variant][it.id];
+    if (!roomPolys.some(p => pointInPoly([s.x, s.z], p))) add('red', `${it.c.name} steht ausserhalb der Wohnung.`, [it.id]);
+    const wall = STATIC_OBS.find(o => overlap(fp[it.id], o.poly));
+    if (wall) add('red', `${it.c.name} kollidiert mit ${wall.name}.`, [it.id]);
+    for (const d of DOOR_SECTORS) if (overlap(fp[it.id], d.poly)) add('red', `${it.c.name} steht im Aufschlag der ${d.name}.`, [it.id]);
+    for (const k of KEEP_CLEAR) if (overlap(fp[it.id], rectPoly(k.r))) add('amber', `${it.c.name} verstellt die ${k.name}.`, [it.id]);
+  }
+  for (let i = 0; i < act.length; i++) for (let j = i + 1; j < act.length; j++) {
+    const a = act[i], b = act[j];
+    if (isTuck(a, b)) continue;
+    if (overlap(fp[a.id], fp[b.id])) add('red', `${a.c.name} überlappt ${b.c.name}.`, [a.id, b.id]);
+  }
+
+  // Abstände
+  overlayRoot.clear();
+  const strips = [];
+  const strip = (it, name, rule, lx0, lx1, side) => {
+    // side: 'front' (+z), 'back', 'left' (-x), 'right' (+x)
+    const s = state.layouts[state.variant][it.id], c = it.c;
+    const fn = d => {
+      if (side === 'front') return obbPoly(s.x, s.z, 0, 0, s.rot, lx0, c.d / 2, lx1, c.d / 2 + d);
+      if (side === 'left') return obbPoly(s.x, s.z, 0, 0, s.rot, -c.w / 2 - d, lx0, -c.w / 2, lx1);
+      return obbPoly(s.x, s.z, 0, 0, s.rot, c.w / 2, lx0, c.w / 2 + d, lx1);
+    };
+    const depth = freeDepth(fn, new Set([it.id]));
+    const sev = depth < rule[0] ? 'red' : depth < rule[1] ? 'amber' : 'ok';
+    strips.push({ poly: fn(Math.min(depth, rule[1])), depth, sev, it, name, rule });
+    if (name === 'Seite') { // Himmelsrichtung der Seite angeben
+      const [nx, nz] = localToWorld(0, 0, s.rot, side === 'left' ? -1 : 1, 0);
+      name = Math.abs(nx) > Math.abs(nz) ? (nx > 0 ? 'Ostseite' : 'Westseite') : (nz > 0 ? 'Südseite' : 'Nordseite');
+    }
+    if (sev !== 'ok') add(sev, `${it.c.name}: ${name} nur ${cm(depth)} cm frei (min. ${cm(rule[0])}, ideal ${cm(rule[1])}).`, [it.id]);
+  };
+  for (const it of act) {
+    const r = it.c.clear; if (!r) continue;
+    const c = it.c;
+    if (r.sides) {
+      const lz0 = -c.d / 2 + 0.45, lz1 = c.d / 2;
+      strip(it, 'Seite', r.sides, lz0, lz1, 'left');
+      strip(it, 'Seite', r.sides, lz0, lz1, 'right');
+    }
+    if (r.foot) strip(it, 'Fussende', r.foot, -c.w / 2, c.w / 2, 'front');
+    if (r.front) strip(it, it.c.kind === 'sofa' ? 'vor dem Sofa' : 'Front', r.front, -c.w / 2 + 0.05, c.w / 2 - 0.05, 'front');
+  }
+  // Küche: Gang vor der Zeile
+  {
+    const fn = d => rectPoly([3.6, 0.88, 8.1, 0.88 + d]);
+    const obs = act.map(it => fp[it.id]);
+    const hit = d => obs.some(p => overlap(fn(d), p, 0.002));
+    let depth = 1.5;
+    if (hit(1.5)) { let lo = 0, hi = 1.5; for (let i = 0; i < 14; i++) { const m = (lo + hi) / 2; if (hit(m)) hi = m; else lo = m; } depth = lo; }
+    const rule = [0.9, 1.2], sev = depth < rule[0] ? 'red' : depth < rule[1] ? 'amber' : 'ok';
+    strips.push({ poly: fn(Math.min(depth, rule[1])), depth, sev, name: 'Küche' });
+    if (sev !== 'ok') add(sev, `Küchengang nur ${cm(depth)} cm (min. 90, ideal 120).`, act.filter(it => overlap(fn(1.2), fp[it.id])).map(it => it.id));
+  }
+  if (state.toggles.dist) {
+    for (const st of strips) {
+      const shape = new THREE.Shape(st.poly.map(([x, z]) => new THREE.Vector2(x, z)));
+      const g = new THREE.ShapeGeometry(shape); g.rotateX(Math.PI / 2);
+      const col = st.sev === 'red' ? 0xc0392b : st.sev === 'amber' ? 0xd99a2b : 0x3f9d4a;
+      const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
+      m.position.y = 0.015; overlayRoot.add(m);
+      const cx = st.poly.reduce((a, p) => a + p[0], 0) / st.poly.length, cz = st.poly.reduce((a, p) => a + p[1], 0) / st.poly.length;
+      const l = label(st.depth >= 1.5 ? '≥150 cm' : `${cm(st.depth)} cm`, 'dist ' + st.sev);
+      l.position.set(cx, 0.05, cz); overlayRoot.add(l);
+    }
+  }
+
+  // Erreichbarkeit
+  if (withPaths) {
+    lastPaths = computePaths();
+    const pr = lastPaths;
+    pathRoot.clear();
+    const lines = [], bad = [];
+    const check = (pts, name, ids) => {
+      let hitK = -1;
+      for (const [x, z] of pts) { hitK = pr.reach(x, z); if (hitK >= 0) break; }
+      if (hitK < 0) { add('red', `${name}: kein 60-cm-Laufweg vom Eingang.`, ids); bad.push(...pts); }
+      else lines.push(pr.pathTo(hitK));
+    };
+    for (const it of act) { const pts = accessPoints(it); if (pts.length) check(pts, it.c.name, [it.id]); }
+    for (const t of FIXED_TARGETS) check([t.p], t.name, []);
+    // Overlay begehbare Fläche
+    const data = new Uint8Array(GW * GH * 4);
+    for (let k = 0; k < GW * GH; k++) {
+      if (pr.walk[k] && pr.parent[k] !== -2) { data[k * 4] = 63; data[k * 4 + 1] = 157; data[k * 4 + 2] = 74; data[k * 4 + 3] = 70; }
+    }
+    const tex = new THREE.DataTexture(data, GW, GH); tex.needsUpdate = true;
+    tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.NearestFilter; tex.flipY = false;
+    const pl = new THREE.Mesh(new THREE.PlaneGeometry(GW * CELL, GH * CELL), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, side: THREE.DoubleSide }));
+    pl.rotation.x = -Math.PI / 2; pl.position.set(GX0 + GW * CELL / 2, 0.01, GZ0 + GH * CELL / 2);
+    // DataTexture: Zeile 0 = unten (v=0). PlaneGeometry: v=0 liegt nach Rotation bei +z. Daher spiegeln.
+    pl.scale.y = -1;
+    pathRoot.add(pl);
+    const lm = new THREE.LineBasicMaterial({ color: 0x2e7d32 });
+    for (const pts of lines) {
+      const geo = new THREE.BufferGeometry().setFromPoints(pts.map(([x, z]) => new THREE.Vector3(x, 0.03, z)));
+      pathRoot.add(new THREE.Line(geo, lm));
+    }
+    for (const [x, z] of bad) {
+      const m = new THREE.Mesh(new THREE.CircleGeometry(0.08, 20), new THREE.MeshBasicMaterial({ color: 0xc0392b }));
+      m.rotation.x = -Math.PI / 2; m.position.set(x, 0.035, z); pathRoot.add(m);
+    }
+    const st = new THREE.Mesh(new THREE.CircleGeometry(0.12, 24), new THREE.MeshBasicMaterial({ color: 0x2e7d32 }));
+    st.rotation.x = -Math.PI / 2; st.position.set(ENTRY[0], 0.035, ENTRY[1]); pathRoot.add(st);
+  }
+  pathRoot.visible = state.toggles.paths;
+
+  // Darstellung
+  for (const it of Object.values(items[state.variant])) {
+    const sev = sevById[it.id];
+    it.foot.material.opacity = sev === 'red' ? 0.38 : sev === 'amber' ? 0.25 : 0;
+    it.foot.material.color.set(sev === 'amber' ? 0xd99a2b : 0xc0392b);
+    it.lbl.element.classList.toggle('bad', !!sev);
+  }
+  renderIssues(); renderList();
+}
+
+// ---------------------------------------------------------------------------
+// UI
+// ---------------------------------------------------------------------------
+let selected = null;
+const $ = id => document.getElementById(id);
+const chf = n => 'CHF ' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+function variantSum(v) {
+  return Object.values(items[v]).reduce((s, it) => s + (state.layouts[v][it.id].on && it.c.price ? it.c.price : 0), 0);
+}
+function renderHeader() {
+  $('sum-ikea').textContent = chf(variantSum('ikea'));
+  $('sum-galaxus').textContent = chf(variantSum('galaxus'));
+  document.querySelectorAll('#variant button').forEach(b => b.classList.toggle('on', b.dataset.v === state.variant));
+  document.querySelectorAll('#views button').forEach(b => b.classList.toggle('on', b.dataset.view === state.view));
+}
+function renderIssues() {
+  const ul = $('issues');
+  const reds = issues.filter(i => i.sev === 'red').length, ambers = issues.length - reds;
+  $('issue-count').textContent = issues.length ? `(${reds} rot, ${ambers} gelb)` : '';
+  if (!issues.length) { ul.innerHTML = '<li class="ok">Keine Konflikte: Türen frei, Abstände eingehalten, alles erreichbar.</li>'; return; }
+  const sorted = [...issues].sort((a, b) => SEV_RANK[b.sev] - SEV_RANK[a.sev]);
+  ul.innerHTML = sorted.map((i, n) => `<li class="${i.sev}" data-n="${n}">${i.text}</li>`).join('');
+  ul.querySelectorAll('li').forEach(li => li.onclick = () => { const i = sorted[+li.dataset.n]; if (i.ids[0]) select(i.ids[0], true); });
+}
+function renderList() {
+  const v = state.variant;
+  $('flist').innerHTML = Object.values(items[v]).map(it => {
+    const s = state.layouts[v][it.id], sev = sevById[it.id];
+    const p = it.c.price ? chf(it.c.price) : it.c.price === 0 ? 'im Set' : '–';
+    return `<label><input type="checkbox" data-id="${it.id}" ${s.on ? 'checked' : ''}><span class="dot ${sev || ''}"></span>
+      <span>${it.c.name}${it.c.note ? ` <small class="muted">(${it.c.note})</small>` : ''}</span><span class="p">${p}</span></label>`;
+  }).join('');
+  $('flist').querySelectorAll('input').forEach(cb => cb.onchange = () => {
+    state.layouts[v][cb.dataset.id].on = cb.checked; syncVariant(); if (!cb.checked && selected === cb.dataset.id) select(null);
+    persist(); renderHeader(); evaluate();
+  });
+}
+function renderSel() {
+  const el = $('sel');
+  if (!selected) { el.innerHTML = '<div class="meta" style="margin:0">Möbel anklicken und ziehen. Gedreht wird unten oder mit <b>R</b> / <b>Q</b> / <b>E</b>.</div>'; return; }
+  const it = items[state.variant][selected], c = it.c, s = state.layouts[state.variant][selected];
+  const own = issues.filter(i => i.ids.includes(selected));
+  el.innerHTML = `<div class="name">${c.name}</div>
+    <div class="meta">${c.shop}${c.price ? ' · ' + chf(c.price) : ''} · ${cm(c.w)} × ${cm(c.d)} × ${cm(c.h)} cm · ${Math.round(((s.rot % 360) + 360) % 360)}°
+      ${c.url ? ` · <a href="${c.url}" target="_blank" rel="noopener">Produkt</a>` : ''}${c.note ? `<br>${c.note}` : ''}</div>
+    <div class="row">
+      <button data-r="-90" title="90° links">⟲ 90°</button><button data-r="-15">⟲ 15°</button>
+      <button data-r="15">⟳ 15°</button><button data-r="90" title="90° rechts">⟳ 90°</button>
+      <button data-hide>Ausblenden</button>
+    </div>
+    ${own.length ? `<ul class="issues" style="margin-top:8px">${own.map(i => `<li class="${i.sev}">${i.text}</li>`).join('')}</ul>` : ''}`;
+  el.querySelectorAll('[data-r]').forEach(b => b.onclick = () => rotateSel(+b.dataset.r));
+  el.querySelector('[data-hide]').onclick = () => hideSel();
+}
+function select(id, focus = false) {
+  if (selected && items[state.variant][selected]) {
+    const it = items[state.variant][selected]; it.edges.visible = false; it.lbl.element.classList.remove('sel');
+  }
+  selected = id;
+  if (id) {
+    const it = items[state.variant][id]; it.edges.visible = true; it.lbl.element.classList.add('sel');
+    if (focus && state.view !== 'ego') {
+      const s = state.layouts[state.variant][id], ctl = state.view === 'top' ? topCtl : orbit, cam = state.view === 'top' ? ortho : persp;
+      const d = new THREE.Vector3(s.x, 0, s.z).sub(ctl.target);
+      ctl.target.add(d); cam.position.add(d);
+    }
+  }
+  renderSel();
+}
+function rotateSel(deg) {
+  if (!selected) return;
+  const s = state.layouts[state.variant][selected];
+  s.rot = Math.round((s.rot + deg) * 100) / 100;
+  applyTransform(items[state.variant][selected], s);
+  persist(); evaluate(); renderSel();
+}
+function hideSel() {
+  if (!selected) return;
+  state.layouts[state.variant][selected].on = false;
+  syncVariant(); select(null); persist(); renderHeader(); evaluate();
+}
+
+// Ansichten
+function setView(v) {
+  if (state.view === 'ego' && v !== 'ego') ego.unlock();
+  state.view = v;
+  orbit.enabled = v === 'orbit'; topCtl.enabled = v === 'top';
+  ceiling.visible = v === 'ego';
+  $('egohint').style.display = v === 'ego' ? 'block' : 'none';
+  $('cross').style.display = v === 'ego' ? 'block' : 'none';
+  if (v === 'ego') {
+    egoCam.position.set(6.95, 1.62, 5.05);
+    egoCam.rotation.set(0, Math.PI / 2 - 0.3, 0);
+    if (state.toggles.low) { state.toggles.low = false; $('t-low').checked = false; buildWalls(false); }
+  }
+  labelsVisible();
+  renderHeader();
+}
+function labelsVisible() {
+  const show = state.toggles.labels && state.view !== 'ego';
+  for (const v of ['ikea', 'galaxus']) for (const it of Object.values(items[v])) it.lbl.userData.want = show;
+  roomLabels.visible = state.view !== 'ego';
+  overlayRoot.visible = state.view !== 'ego';
+}
+// CSS2DRenderer beachtet nur die eigene Sichtbarkeit, nicht die der Eltern: hier nachziehen
+function syncLabelVisibility() {
+  scene.traverse(o => {
+    if (!o.isCSS2DObject) return;
+    let vis = o.userData.want !== false, p = o.parent;
+    while (vis && p) { if (!p.visible) vis = false; p = p.parent; }
+    o.visible = vis;
+  });
+}
+const activeCam = () => state.view === 'top' ? ortho : state.view === 'ego' ? egoCam : persp;
+
+// Ziehen und Auswählen
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+let drag = null;
+function pick(ev) {
+  const r = renderer.domElement.getBoundingClientRect();
+  ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, activeCam());
+}
+function floorHit() { const p = new THREE.Vector3(); return ray.ray.intersectPlane(floorPlane, p) ? p : null; }
+renderer.domElement.addEventListener('pointerdown', ev => {
+  if (state.view === 'ego') { if (!ego.isLocked) ego.lock(); return; }
+  if (ev.button !== 0) return;
+  pick(ev);
+  const groups = Object.values(items[state.variant]).filter(it => it.group.visible).map(it => it.group);
+  const hits = ray.intersectObjects(groups, true).filter(h => h.object.type === 'Mesh' && h.object.material.opacity !== 0);
+  if (!hits.length) { select(null); return; }
+  let o = hits[0].object; while (o && !o.userData.fid) o = o.parent;
+  select(o.userData.fid);
+  const p = floorHit(); if (!p) return;
+  const s = state.layouts[state.variant][selected];
+  drag = { id: selected, dx: s.x - p.x, dz: s.z - p.z };
+  orbit.enabled = false; topCtl.enabled = false;
+  renderer.domElement.setPointerCapture(ev.pointerId);
+});
+let dragTick = 0;
+renderer.domElement.addEventListener('pointermove', ev => {
+  if (!drag) return;
+  pick(ev); const p = floorHit(); if (!p) return;
+  const snap = ev.altKey ? 0.01 : 0.05;
+  const s = state.layouts[state.variant][drag.id];
+  s.x = Math.round((p.x + drag.dx) / snap) * snap; s.z = Math.round((p.z + drag.dz) / snap) * snap;
+  applyTransform(items[state.variant][drag.id], s);
+  const now = performance.now();
+  if (now - dragTick > 60) { dragTick = now; evaluate(false); }
+});
+renderer.domElement.addEventListener('pointerup', ev => {
+  if (!drag) return;
+  drag = null;
+  orbit.enabled = state.view === 'orbit'; topCtl.enabled = state.view === 'top';
+  persist(); evaluate(); renderSel();
+});
+renderer.domElement.addEventListener('wheel', ev => {
+  if (ev.shiftKey && selected && state.view !== 'ego') { ev.preventDefault(); rotateSel(ev.deltaY > 0 ? 15 : -15); }
+}, { passive: false });
+
+// Tastatur
+const keys = {};
+addEventListener('keydown', ev => {
+  if (ev.target.tagName === 'INPUT') return;
+  keys[ev.code] = true;
+  if (ev.key === 'Shift') { orbit.enableZoom = false; topCtl.enableZoom = false; }
+  if (state.view === 'ego') return;
+  if (ev.code === 'KeyR') rotateSel(90);
+  if (ev.code === 'KeyQ') rotateSel(-15);
+  if (ev.code === 'KeyE') rotateSel(15);
+  if (ev.code === 'Delete' || ev.code === 'Backspace') hideSel();
+  if (ev.code === 'Escape') select(null);
+});
+addEventListener('keyup', ev => {
+  keys[ev.code] = false;
+  if (ev.key === 'Shift') { orbit.enableZoom = true; topCtl.enableZoom = true; }
+});
+
+// Ego: Bewegung mit Kollision gegen Wände, Einbauten und Möbel
+function blockedAt(x, z) {
+  const me = rectPoly([x - 0.18, z - 0.18, x + 0.18, z + 0.18]);
+  if (STATIC_OBS.some(o => overlap(me, o.poly, 0.001))) return true;
+  return activeItems().some(it => it.c.h > 0.3 && overlap(me, footprint(it), 0.001));
+}
+function egoStep(dt) {
+  const turn = (keys.ArrowLeft ? 1 : 0) - (keys.ArrowRight ? 1 : 0);
+  if (turn) egoCam.rotation.y += turn * dt * 1.6;
+  const f = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0);
+  const r = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0);
+  if (!f && !r) return;
+  const yaw = egoCam.rotation.y, sp = 1.5 * dt;
+  const fx = -Math.sin(yaw), fz = -Math.cos(yaw), rx = Math.cos(yaw), rz = -Math.sin(yaw);
+  const dx = (fx * f + rx * r) * sp, dz = (fz * f + rz * r) * sp;
+  const p = egoCam.position, stuck = blockedAt(p.x, p.z);
+  if (stuck || !blockedAt(p.x + dx, p.z + dz)) { p.x += dx; p.z += dz; }
+  else if (!blockedAt(p.x + dx, p.z)) p.x += dx;
+  else if (!blockedAt(p.x, p.z + dz)) p.z += dz;
+}
+
+// Bedienelemente
+document.querySelectorAll('#variant button').forEach(b => b.onclick = () => {
+  select(null); state.variant = b.dataset.v; syncVariant(); persist(); renderHeader(); evaluate();
+});
+document.querySelectorAll('#views button').forEach(b => b.onclick = () => setView(b.dataset.view));
+const bindToggle = (id, key, fn) => { const el = $(id); el.checked = state.toggles[key]; el.onchange = () => { state.toggles[key] = el.checked; persist(); fn(); }; };
+bindToggle('t-labels', 'labels', labelsVisible);
+bindToggle('t-dist', 'dist', () => evaluate(false));
+bindToggle('t-paths', 'paths', () => { pathRoot.visible = state.toggles.paths; });
+bindToggle('t-low', 'low', () => buildWalls(state.toggles.low));
+$('reset').onclick = () => {
+  for (const d of DEFAULTS[state.variant]) state.layouts[state.variant][d.id] = { x: d.x, z: d.z, rot: d.rot, on: true };
+  select(null); syncVariant(); persist(); renderHeader(); evaluate();
+};
+$('collapse').onclick = () => { const p = $('panel'); p.classList.toggle('collapsed'); $('collapse').textContent = p.classList.contains('collapsed') ? '+' : '–'; };
+
+addEventListener('resize', () => {
+  renderer.setSize(innerWidth, innerHeight); labelRenderer.setSize(innerWidth, innerHeight);
+  persp.aspect = egoCam.aspect = innerWidth / innerHeight; persp.updateProjectionMatrix(); egoCam.updateProjectionMatrix();
+  fitOrtho();
+});
+
+// Start
+buildWalls(state.toggles.low);
+syncVariant();
+renderHeader();
+setView('orbit');
+evaluate();
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (state.view === 'ego') egoStep(dt);
+  else if (state.view === 'orbit') orbit.update(); else topCtl.update();
+  const cam = activeCam();
+  renderer.render(scene, cam);
+  syncLabelVisibility();
+  labelRenderer.render(scene, cam);
+});
+window.__kp = { state, evaluate, setView, items, get issues() { return issues; }, select, _ortho: ortho };
+</script>
+</body>
+</html>
