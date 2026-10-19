@@ -138,7 +138,7 @@
   <div class="body">
     <h2>Variante</h2>
     <div class="seg" id="variant">
-      <button data-v="ikea">IKEA<small id="sum-ikea"></small></button>
+      <button data-v="ikea">Deine Auswahl<small id="sum-ikea"></small></button>
       <button data-v="galaxus">Galaxus<small id="sum-galaxus"></small></button>
     </div>
 
@@ -183,7 +183,7 @@
       Wände, Türen und Fenster stammen aus dem Grundriss 1:100, auf ca. ±3 cm genau vermessen. Raumhöhe 2.50 m (von dir).
       Materialien nach den Fotos der Musterwohnung: Holzdecke, Eichenparkett, weisse Küche mit Granit, Bad mit Korbmuster und Waschturm, Fenster mit Brüstung 0.90 m.
       <b>Annahmen:</b> Türhöhe 2.10 m, Sofa = SÖDERHAMN 3er als Platzhalter,
-      Esstisch rund Ø 100 cm (von dir) mit 4 Stühlen à 45 × 50 cm (Stuhlmasse angenommen), TV 55″.
+      Esstisch rund Ø 100 cm (von dir) mit 4 Stühlen à 45 × 50 cm (Stuhlmasse angenommen), TV 55″. Palese-Masse laut Händlerangabe (Bank 104 × 57, Sessel 57 × 57, Tisch 72 × 39.5 cm).
       Unklar: der geschlossene Block oben links (Schacht?). Das X-Element im Reduit ist vermutlich der Kleider-Einbauschrank.
     </div>
   </div>
@@ -277,8 +277,9 @@ const FIXED_TARGETS = [
 // ---------------------------------------------------------------------------
 const IK = 'https://www.ikea.com/ch/de/p/';
 const CAT = {
-  sofa: { name: 'Sofa SÖDERHAMN 3er', note: 'Platzhalter, du suchst gebraucht', shop: '–', price: null, w: 1.98, d: 0.99, h: 0.83,
-    kind: 'sofa', mat: 'fabricBeige', clear: { front: [0.25, 0.30] }, access: 'sofa', url: IK + 'soederhamn-3er-sofa-fridtuna-hellbeige-s89449690/' },
+  sofa: { name: 'GLOSTAD 3er-Sofa mit Récamiere', shop: 'IKEA', price: 199.00, w: 1.71, d: 0.78, h: 0.68,
+    chaise: { w: 0.65, d: 1.46 }, kind: 'sofaChaise', mat: 'fabricGrey', clear: { front: [0.25, 0.30] }, access: 'sofa',
+    url: IK + 'glostad-3er-sofa-mit-recamiere-knisa-dunkelgrau-s89542669/' },
   diningTable: { name: 'Esstisch rund Ø 100 (Bestand)', shop: 'Bestand', price: null, w: 1.00, d: 1.00, h: 0.75,
     kind: 'roundTable', top: 'woodLight', legs: 'woodLight', type: 'table', round: true },
   diningChair: { name: 'Stuhl (Bestand)', note: 'Stuhlmasse angenommen', shop: 'Bestand', price: null, w: 0.45, d: 0.50, h: 0.80,
@@ -291,8 +292,10 @@ const CAT = {
     url: IK + 'slattum-bettgestell-gepolstert-vissle-dunkelgrau-00571245/' },
   kullen: { name: 'KULLEN Nachttisch', shop: 'IKEA', price: 39.95, w: 0.35, d: 0.40, h: 0.49, kind: 'cabinet', mat: 'blackBrown', fronts: [1, 1],
     type: 'nightstand', url: IK + 'kullen-kommode-mit-2-schubladen-schwarzbraun-60322130/' },
-  malm3: { name: 'MALM Kommode 3 Schubl.', note: 'nicht in deiner Liste', shop: 'IKEA', price: 99.95, w: 0.80, d: 0.48, h: 0.78, kind: 'cabinet', mat: 'oak',
-    fronts: [1, 1, 1], clear: { front: [0.6, 0.8] }, access: 'front', url: 'https://www.ikea.com/ch/de/cat/kommoden-10451/f/beige-kommoden-f-colors--10003/' },
+  storklinta: { name: 'STORKLINTA Kommode 6 Schubl.', shop: 'IKEA', price: 149.00, w: 1.40, d: 0.50, h: 0.75, kind: 'cabinet', mat: 'white',
+    fronts: [1, 1, 1], cols: 2, clear: { front: [0.6, 0.8] }, access: 'front', url: IK + 'storklinta-kommode-mit-6-schubladen-weiss-70627550/' },
+  vesken: { name: 'VESKEN Regal', shop: 'IKEA', price: 14.95, w: 0.367, d: 0.233, h: 1.006, kind: 'shelf', mat: 'black', shelves: 4,
+    clear: { front: [0.6, 0.7] }, access: 'front', url: IK + 'vesken-regal-schwarz-30450807/' },
   kallax: { name: 'KALLAX TV-Bank', shop: 'IKEA', price: 79.95, w: 1.47, d: 0.39, h: 0.60, kind: 'kallax', mat: 'blackBrown', tv: true,
     access: 'any', url: IK + 'kallax-tv-bank-schwarzbraun-10562090/' },
   vitteryd: { name: 'VITTERYD Couchtisch', shop: 'IKEA', price: 169.00, w: 0.97, d: 0.60, h: 0.49, kind: 'vitteryd', mat: 'white',
@@ -321,16 +324,16 @@ const CAT = {
     clear: { front: [0.6, 0.7] }, access: 'front', url: IK + 'ragrund-regal-bambus-80549420/' },
   relaxBamboo: { name: 'Relaxdays Badregal Bambus', note: 'Preis ca.', shop: 'Galaxus', price: 60.00, w: 0.33, d: 0.255, h: 1.19, kind: 'shelf', mat: 'bamboo', shelves: 4,
     clear: { front: [0.6, 0.7] }, access: 'front', url: 'https://www.galaxus.ch/de/s14/product/relaxdays-badregal-33-x-2550-x-119-cm-badezimmerregal-13873470' },
-  paleseBench: { name: 'tectake Palese Bank', note: 'Masse geschätzt', shop: 'Galaxus', price: 130.90, w: 1.15, d: 0.60, h: 0.70, kind: 'lounge', mat: 'rattan',
+  paleseBench: { name: 'tectake Palese Bank (Set)', shop: 'Galaxus', price: 149.90, w: 1.04, d: 0.57, h: 0.79, kind: 'lounge', mat: 'rattan',
     type: 'chair', access: 'chair', url: 'https://www.galaxus.ch/de/s4/product/tectake-rattan-gartenset-palese-fuer-4-personen-gartenlounge-54773834' },
-  paleseChair: { name: 'tectake Palese Sessel', note: 'im Set, Masse geschätzt', shop: 'Galaxus', price: 0, w: 0.60, d: 0.60, h: 0.70, kind: 'lounge', mat: 'rattan',
+  paleseChair: { name: 'tectake Palese Sessel', note: 'im Set', shop: 'Galaxus', price: 0, w: 0.57, d: 0.57, h: 0.79, kind: 'lounge', mat: 'rattan',
     type: 'chair', access: 'chair' },
-  paleseTable: { name: 'tectake Palese Tisch', note: 'im Set, Masse geschätzt', shop: 'Galaxus', price: 0, w: 0.60, d: 0.60, h: 0.38, kind: 'loungeTable', mat: 'rattan',
+  paleseTable: { name: 'tectake Palese Tisch', note: 'im Set', shop: 'Galaxus', price: 0, w: 0.72, d: 0.395, h: 0.41, kind: 'loungeTable', mat: 'rattan',
     type: 'table' },
 };
 
 const SHARED = [
-  { id: 'sofa', cat: 'sofa', x: 4.35, z: 3.295, rot: 0 },
+  { id: 'sofa', cat: 'sofa', x: 4.35, z: 2.49, rot: 0 },
   { id: 'esstisch', cat: 'diningTable', x: 7.00, z: 3.60, rot: 0 },
   { id: 'stuhl1', cat: 'diningChair', x: 6.30, z: 3.60, rot: 90 },
   { id: 'stuhl2', cat: 'diningChair', x: 7.70, z: 3.60, rot: -90 },
@@ -343,14 +346,15 @@ const DEFAULTS = {
     { id: 'schuh', cat: 'bissa', x: 7.99, z: 5.40, rot: -90 },
     { id: 'bett', cat: 'slattum', x: 2.27, z: 8.62, rot: 180 },
     { id: 'nacht', cat: 'kullen', x: 1.30, z: 9.45, rot: 180 },
-    { id: 'kommode', cat: 'malm3', x: 3.91, z: 7.00, rot: -90 },
-    { id: 'tv', cat: 'kallax', x: 4.35, z: 5.235, rot: 180 },
-    { id: 'couchtisch', cat: 'vitteryd', x: 4.35, z: 4.42, rot: 0 },
-    { id: 'btisch', cat: 'tarnoTable', x: 1.00, z: 3.30, rot: 0 },
-    { id: 'bstuhl1', cat: 'tarnoChair', x: 1.00, z: 2.83, rot: 0 },
-    { id: 'bstuhl2', cat: 'tarnoChair', x: 1.00, z: 3.77, rot: 180 },
-    { id: 'bstuhl3', cat: 'tarnoChairX', x: 1.47, z: 3.30, rot: -90 },
-    { id: 'badregal', cat: 'ragrund', x: 6.155, z: 7.80, rot: -90 },
+    { id: 'kommode', cat: 'storklinta', x: 1.12, z: 5.80, rot: 0 },
+    { id: 'tv', cat: 'kallax', x: 4.55, z: 5.235, rot: 180 },
+    { id: 'couchtisch', cat: 'vitteryd', x: 4.70, z: 3.50, rot: 0 },
+    { id: 'bbank', cat: 'paleseBench', x: 0.77, z: 4.745, rot: 180 },
+    { id: 'btisch', cat: 'paleseTable', x: 0.77, z: 3.86, rot: 0 },
+    { id: 'bsessel1', cat: 'paleseChair', x: 0.485, z: 3.25, rot: 0 },
+    { id: 'bsessel2', cat: 'paleseChair', x: 1.10, z: 3.25, rot: 0 },
+    { id: 'badregal', cat: 'vesken', x: 6.2235, z: 7.62, rot: -90 },
+    { id: 'badregal2', cat: 'vesken', x: 6.2235, z: 8.00, rot: -90 },
   ],
   galaxus: [
     ...SHARED,
@@ -358,12 +362,12 @@ const DEFAULTS = {
     { id: 'bett', cat: 'legenborn', x: 2.27, z: 8.56, rot: 180 },
     { id: 'nacht', cat: 'caleb', x: 1.38, z: 9.515, rot: 180 },
     { id: 'kommode', cat: 'ingrid', x: 4.00, z: 7.00, rot: -90 },
-    { id: 'tv', cat: 'bianca', x: 4.35, z: 5.23, rot: 180 },
-    { id: 'couchtisch', cat: 'vasagleRound', x: 4.35, z: 4.46, rot: 0 },
-    { id: 'bbank', cat: 'paleseBench', x: 0.42, z: 3.30, rot: 90 },
-    { id: 'btisch', cat: 'paleseTable', x: 1.12, z: 3.30, rot: 0 },
-    { id: 'bsessel1', cat: 'paleseChair', x: 1.12, z: 2.55, rot: 0 },
-    { id: 'bsessel2', cat: 'paleseChair', x: 1.12, z: 4.05, rot: 180 },
+    { id: 'tv', cat: 'bianca', x: 4.55, z: 5.23, rot: 180 },
+    { id: 'couchtisch', cat: 'vasagleRound', x: 4.70, z: 3.60, rot: 0 },
+    { id: 'bbank', cat: 'paleseBench', x: 0.77, z: 4.745, rot: 180 },
+    { id: 'btisch', cat: 'paleseTable', x: 0.77, z: 3.86, rot: 0 },
+    { id: 'bsessel1', cat: 'paleseChair', x: 0.485, z: 3.25, rot: 0 },
+    { id: 'bsessel2', cat: 'paleseChair', x: 1.10, z: 3.25, rot: 0 },
     { id: 'badregal', cat: 'relaxBamboo', x: 6.2125, z: 7.80, rot: -90 },
   ],
 };
@@ -371,7 +375,7 @@ const DEFAULTS = {
 // ---------------------------------------------------------------------------
 // Zustand (localStorage nur als Komfort)
 // ---------------------------------------------------------------------------
-const STORE = 'kesslerplatz-3d-v2';
+const STORE = 'kesslerplatz-3d-v3';
 let saved = {};
 try { saved = JSON.parse(localStorage.getItem(STORE)) || {}; } catch (e) { saved = {}; }
 const state = {
@@ -825,7 +829,7 @@ const lampGroup = new THREE.Group(); scene.add(lampGroup);     // nur innen sich
   curtain(8.06, 2.52, true, 0.34); curtain(8.06, 4.66, true, 0.34);   // Wohnen Ost
   decoGroup.add(box(0.02, 0.02, 3.6, MAT.steel, 2.40, 2.45, 3.45), box(0.02, 0.02, 2.2, MAT.steel, 0.47, 2.45, 7.38), box(0.02, 0.02, 2.5, MAT.steel, 8.06, 2.45, 3.59));
   const rug = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.012, 1.6), M(0xe8e1d4, { map: fabricTex, roughness: 1 }));
-  rug.position.set(4.35, 0.006, 4.15); rug.receiveShadow = true; decoGroup.add(rug);
+  rug.position.set(4.55, 0.006, 3.75); rug.receiveShadow = true; decoGroup.add(rug);
   const plant = (x, z, s) => {
     decoGroup.add(cyl(0.16 * s, 0.32 * s, M(0x3a3632, { roughness: 0.6 }), x, 0, z));
     const leaf = M(0x5d7a46, { roughness: 0.8 });
@@ -846,7 +850,7 @@ const lampGroup = new THREE.Group(); scene.add(lampGroup);     // nur innen sich
   const bamboo = M(0xd8b47c, { map: grainTex, roughness: 0.7, emissive: 0x6b4a1c, emissiveIntensity: 0.6 });
   const paper = M(0xfbf7ee, { emissive: 0xffe6c0, emissiveIntensity: 0.9, roughness: 1 });
   const sg = new THREE.SphereGeometry(0.33, 28, 18); sg.scale(1, 0.72, 1);
-  pendant(4.35, 4.0, 0.75, sg, bamboo, 7);
+  pendant(4.70, 3.50, 0.75, sg, bamboo, 7);
   pendant(7.0, 3.6, 0.95, new THREE.CylinderGeometry(0.1, 0.22, 0.26, 28, 1, true), bamboo, 5);
   pendant(2.3, 7.3, 0.45, new THREE.SphereGeometry(0.28, 28, 18), paper, 6);
   pendant(7.3, 6.4, 0.4, new THREE.SphereGeometry(0.2, 24, 16), paper, 3);
@@ -866,11 +870,11 @@ const BUILD = {
     const g = new THREE.Group(), body = MAT[c.mat], legH = c.legs || 0.02;
     const fd = 0.018, bh = c.h - legH;
     g.add(box(c.w, bh, c.d - fd, body, 0, legH, -fd / 2));
-    const n = c.fronts.length, gap = 0.006;
-    for (let i = 0; i < n; i++) {
-      const ph = bh / n;
-      g.add(box(c.w - 0.01, ph - gap, fd, body, 0, legH + i * ph + gap / 2, c.d / 2 - fd / 2));
-      g.add(box(Math.min(0.12, c.w * 0.3), 0.012, 0.012, MAT.steel, 0, legH + i * ph + ph * 0.72, c.d / 2 + 0.006));
+    const n = c.fronts.length, gap = 0.006, cols = c.cols || 1, cw = c.w / cols;
+    for (let k = 0; k < cols; k++) for (let i = 0; i < n; i++) {
+      const ph = bh / n, cx = -c.w / 2 + cw * (k + 0.5);
+      g.add(box(cw - 0.01, ph - gap, fd, body, cx, legH + i * ph + gap / 2, c.d / 2 - fd / 2));
+      g.add(box(Math.min(0.12, cw * 0.3), 0.012, 0.012, MAT.steel, cx, legH + i * ph + ph * 0.72, c.d / 2 + 0.006));
     }
     if (c.legs) legs4(g, c.w, c.d, legH, MAT[c.legMat || 'steel'], 0.03, 0.03);
     else g.add(box(c.w - 0.04, legH, c.d - 0.06, MAT.black, 0, 0, 0));
@@ -949,6 +953,19 @@ const BUILD = {
       b.rotation.x = -0.12; g.add(b);
     }
     for (const sx of [-1, 1]) g.add(box(0.06, 0.55, c.d, m, sx * (c.w / 2 - 0.03), 0, 0));
+    return g;
+  },
+  sofaChaise(c) {
+    const g = new THREE.Group(), m = MAT[c.mat], cw = c.chaise.w, cd = c.chaise.d;
+    g.add(box(c.w, 0.25, c.d - 0.08, m, 0, 0.0, 0.04));                     // Sockel
+    g.add(box(cw, 0.25, cd - c.d + 0.04, m, -c.w / 2 + cw / 2, 0, c.d / 2 + (cd - c.d) / 2 - 0.02)); // Récamiere
+    g.add(box(cw - 0.06, 0.16, cd - 0.22, m, -c.w / 2 + cw / 2, 0.25, -c.d / 2 + 0.2 + (cd - 0.22) / 2));
+    const n = 2, sw = (c.w - cw - 0.06) / n;
+    for (let i = 0; i < n; i++) g.add(box(sw - 0.015, 0.16, c.d - 0.24, m, -c.w / 2 + cw + sw * (i + 0.5), 0.25, 0.08));
+    g.add(box(c.w, c.h - 0.06, 0.16, m, 0, 0.0, -c.d / 2 + 0.08));         // Rücken
+    g.add(box(0.06, 0.57, c.d, m, c.w / 2 - 0.03, 0, 0));                  // Armlehne rechts
+    g.add(box(0.06, 0.57, cd, m, -c.w / 2 + 0.03, 0, -c.d / 2 + cd / 2));  // Armlehne Récamiere
+    for (let i = 0; i < 3; i++) g.add(box(c.w / 3 - 0.04, 0.34, 0.14, MAT.cushion, -c.w / 2 + c.w / 6 + i * c.w / 3, 0.41, -c.d / 2 + 0.22));
     return g;
   },
   table(c) {
@@ -1101,6 +1118,17 @@ function activeItems() {
   const v = state.variant;
   return Object.values(items[v]).filter(it => state.layouts[v][it.id].on);
 }
+// Grundriss als Liste konvexer Polygone (Sofa mit Récamiere = L-Form aus zwei Teilen)
+function polysOf(it) {
+  const list = [footprint(it)];
+  const c = it.c;
+  if (c.chaise) {
+    const s = state.layouts[state.variant][it.id];
+    list.push(obbPoly(s.x, s.z, 0, 0, s.rot, -c.w / 2, c.d / 2, -c.w / 2 + c.chaise.w, -c.d / 2 + c.chaise.d));
+  }
+  return list;
+}
+const anyOverlap = (as, bs, eps) => as.some(a => bs.some(b => overlap(a, b, eps)));
 function footprint(it) {
   const s = state.layouts[state.variant][it.id];
   if (it.c.round) {
@@ -1113,7 +1141,7 @@ const isTuck = (a, b) => (a.c.type === 'chair' && b.c.type === 'table') || (a.c.
 
 // freie Tiefe vor einer Kante: Streifen in lokalen Koordinaten [lx0, lz0, lx1, lz1](depth)
 function freeDepth(stripFn, exclude, maxD = 1.5) {
-  const obs = [...STATIC_OBS.map(o => o.poly), ...activeItems().filter(o => !exclude.has(o.id)).map(footprint)];
+  const obs = [...STATIC_OBS.map(o => o.poly), ...activeItems().filter(o => !exclude.has(o.id)).flatMap(polysOf)];
   const hit = d => obs.some(p => overlap(stripFn(d), p, 0.002));
   if (!hit(maxD)) return maxD;
   let lo = 0, hi = maxD;
@@ -1127,7 +1155,7 @@ function freeDepth(stripFn, exclude, maxD = 1.5) {
 const CELL = 0.05, GX0 = -0.1, GZ0 = -0.1, GW = Math.ceil(8.8 / CELL), GH = Math.ceil(10.1 / CELL);
 function computePaths() {
   const N = GW * GH, blocked = new Uint8Array(N);
-  const polys = [...STATIC_OBS.map(o => o.poly), ...activeItems().map(footprint)];
+  const polys = [...STATIC_OBS.map(o => o.poly), ...activeItems().flatMap(polysOf)];
   for (const p of polys) {
     let minx = Infinity, maxx = -Infinity, minz = Infinity, maxz = -Infinity;
     for (const [x, z] of p) { minx = Math.min(minx, x); maxx = Math.max(maxx, x); minz = Math.min(minz, z); maxz = Math.max(maxz, z); }
@@ -1202,7 +1230,7 @@ function accessPoints(it) {
     case 'front': return [P(0, c.d / 2 + o)];
     case 'bed': return [P(-c.w / 2 - o, 0.1), P(c.w / 2 + o, 0.1)];
     case 'sofa': return [P(0, c.d / 2 + o), P(-c.w / 2 - o, c.d / 4), P(c.w / 2 + o, c.d / 4)];
-    case 'chair': return [P(0, -c.d / 2 - o), P(-c.w / 2 - o, 0), P(c.w / 2 + o, 0)];
+    case 'chair': return [P(0, -c.d / 2 - o), P(-c.w / 2 - o, c.d / 4), P(c.w / 2 + o, c.d / 4)];
     case 'any': return [P(0, c.d / 2 + o), P(-c.w / 2 - o, 0), P(c.w / 2 + o, 0)];
     default: return [];
   }
@@ -1224,21 +1252,21 @@ function evaluate(withPaths = true) {
     for (const id of ids) if (!sevById[id] || SEV_RANK[sev] > SEV_RANK[sevById[id]]) sevById[id] = sev;
   };
   const act = activeItems();
-  const fp = Object.fromEntries(act.map(it => [it.id, footprint(it)]));
+  const fp = Object.fromEntries(act.map(it => [it.id, polysOf(it)]));
   const roomPolys = ROOMS.filter(r => r.floor).map(r => rectPoly(r.r));
 
   for (const it of act) {
     const s = state.layouts[state.variant][it.id];
     if (!roomPolys.some(p => pointInPoly([s.x, s.z], p))) add('red', `${it.c.name} steht ausserhalb der Wohnung.`, [it.id]);
-    const wall = STATIC_OBS.find(o => overlap(fp[it.id], o.poly));
+    const wall = STATIC_OBS.find(o => anyOverlap(fp[it.id], [o.poly]));
     if (wall) add('red', `${it.c.name} kollidiert mit ${wall.name}.`, [it.id]);
-    for (const d of DOOR_SECTORS) if (overlap(fp[it.id], d.poly)) add('red', `${it.c.name} steht im Aufschlag der ${d.name}.`, [it.id]);
-    for (const k of KEEP_CLEAR) if (overlap(fp[it.id], rectPoly(k.r))) add('amber', `${it.c.name} verstellt die ${k.name}.`, [it.id]);
+    for (const d of DOOR_SECTORS) if (anyOverlap(fp[it.id], [d.poly])) add('red', `${it.c.name} steht im Aufschlag der ${d.name}.`, [it.id]);
+    for (const k of KEEP_CLEAR) if (anyOverlap(fp[it.id], [rectPoly(k.r)])) add('amber', `${it.c.name} verstellt die ${k.name}.`, [it.id]);
   }
   for (let i = 0; i < act.length; i++) for (let j = i + 1; j < act.length; j++) {
     const a = act[i], b = act[j];
     if (isTuck(a, b)) continue;
-    if (overlap(fp[a.id], fp[b.id])) add('red', `${a.c.name} überlappt ${b.c.name}.`, [a.id, b.id]);
+    if (anyOverlap(fp[a.id], fp[b.id])) add('red', `${a.c.name} überlappt ${b.c.name}.`, [a.id, b.id]);
   }
 
   // Abstände
@@ -1270,18 +1298,18 @@ function evaluate(withPaths = true) {
       strip(it, 'Seite', r.sides, lz0, lz1, 'right');
     }
     if (r.foot) strip(it, 'Fussende', r.foot, -c.w / 2, c.w / 2, 'front');
-    if (r.front) strip(it, it.c.kind === 'sofa' ? 'vor dem Sofa' : 'Front', r.front, -c.w / 2 + 0.05, c.w / 2 - 0.05, 'front');
+    if (r.front) strip(it, it.c.kind.startsWith('sofa') ? 'vor dem Sofa' : 'Front', r.front, -c.w / 2 + (c.chaise ? c.chaise.w : 0) + 0.05, c.w / 2 - 0.05, 'front');
   }
   // Küche: Gang vor der Zeile
   {
     const fn = d => rectPoly([3.6, 0.88, 8.1, 0.88 + d]);
-    const obs = act.map(it => fp[it.id]);
+    const obs = act.flatMap(it => fp[it.id]);
     const hit = d => obs.some(p => overlap(fn(d), p, 0.002));
     let depth = 1.5;
     if (hit(1.5)) { let lo = 0, hi = 1.5; for (let i = 0; i < 14; i++) { const m = (lo + hi) / 2; if (hit(m)) hi = m; else lo = m; } depth = lo; }
     const rule = [0.9, 1.2], sev = depth < rule[0] ? 'red' : depth < rule[1] ? 'amber' : 'ok';
     strips.push({ poly: fn(Math.min(depth, rule[1])), depth, sev, name: 'Küche' });
-    if (sev !== 'ok') add(sev, `Küchengang nur ${cm(depth)} cm (min. 90, ideal 120).`, act.filter(it => overlap(fn(1.2), fp[it.id])).map(it => it.id));
+    if (sev !== 'ok') add(sev, `Küchengang nur ${cm(depth)} cm (min. 90, ideal 120).`, act.filter(it => anyOverlap([fn(1.2)], fp[it.id])).map(it => it.id));
   }
   if (state.toggles.dist) {
     for (const st of strips) {
@@ -1548,7 +1576,7 @@ addEventListener('keyup', ev => {
 function blockedAt(x, z) {
   const me = rectPoly([x - 0.18, z - 0.18, x + 0.18, z + 0.18]);
   if (STATIC_OBS.some(o => overlap(me, o.poly, 0.001))) return true;
-  return activeItems().some(it => it.c.h > 0.3 && overlap(me, footprint(it), 0.001));
+  return activeItems().some(it => it.c.h > 0.3 && anyOverlap([me], polysOf(it), 0.001));
 }
 function egoStep(dt) {
   const turn = (keys.ArrowLeft ? 1 : 0) - (keys.ArrowRight ? 1 : 0);
@@ -1608,11 +1636,11 @@ const TOUR = [
   { t: 23, p: [2.75, 2.75], l: [0.8, 1.00, 3.2], stop: true },
   { t: 27, p: [1.75, 2.35], l: [1.0, 0.70, 3.4], cap: 'Balkon' },
   { t: 30, p: [1.75, 2.35], l: [5.0, 1.30, 2.5], stop: true, cap: 'Blick vom Balkon zurück in die Wohnung' },
-  { t: 34, p: [3.30, 2.15], l: [6.0, 1.20, 1.2] },
+  { t: 34, p: [3.05, 1.85], l: [6.0, 1.20, 1.2] },
   { t: 38, p: [5.20, 1.75], l: [6.8, 1.00, 0.4], stop: true, cap: 'Küche' },
   { t: 42, p: [6.25, 2.20], l: [7.2, 0.80, 3.8], stop: true, cap: 'Essplatz am Ostfenster: dein runder Tisch Ø 100 cm' },
-  { t: 45, p: [5.70, 2.30], l: [3.0, 1.30, 2.6], cap: 'Hinter dem Sofa durch Richtung Schlafzimmer' },
-  { t: 48, p: [3.00, 2.55], l: [2.9, 1.30, 5.0] },
+  { t: 45, p: [5.70, 1.55], l: [3.0, 1.30, 2.0], cap: 'Hinter dem Sofa durch Richtung Schlafzimmer' },
+  { t: 48, p: [3.00, 1.80], l: [2.9, 1.30, 5.0] },
   { t: 51, p: [2.95, 4.55], l: [3.2, 1.40, 7.0] },
   { t: 53, p: [3.20, 5.10], l: [3.2, 1.40, 7.0], cap: 'Durch die Tür ins Schlafzimmer' },
   { t: 55, p: [3.20, 6.10], l: [2.3, 0.80, 8.6] },
@@ -1688,6 +1716,23 @@ renderer.setAnimationLoop(() => {
 });
 window.__kp = { state, evaluate, setView, items, get issues() { return issues; }, select, _ortho: ortho, tour, tourAt, TOUR_END,
   freezeShadows() { renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true; },
+  // Standbild aus beliebiger Augenposition (für Screenshots)
+  captureView(p, l, cap) {
+    tour.playing = false;
+    egoCam.position.set(p[0], EYE, p[1]); egoCam.lookAt(l[0], l[1], l[2]);
+    renderer.render(scene, egoCam);
+    const src = renderer.domElement, c = document.createElement('canvas');
+    c.width = src.width; c.height = src.height;
+    const g = c.getContext('2d'), k = c.height / 720;
+    g.drawImage(src, 0, 0);
+    if (cap) {
+      g.font = `600 ${Math.round(26 * k)}px -apple-system, Segoe UI, Inter, Roboto, sans-serif`;
+      const w = g.measureText(cap).width + 48 * k, h = 56 * k, x = (c.width - w) / 2, y = c.height - h - 28 * k;
+      g.fillStyle = 'rgba(20,18,16,.78)'; g.beginPath(); g.roundRect(x, y, w, h, 12 * k); g.fill();
+      g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(cap, c.width / 2, y + h / 2);
+    }
+    return c.toDataURL('image/jpeg', 0.9);
+  },
   // Videoaufnahme: Renderschleife anhalten und Einzelbilder samt Untertitel als JPEG liefern
   captureFrame(t) {
     renderer.setAnimationLoop(null);

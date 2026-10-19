@@ -212,6 +212,7 @@
   <table>
     <thead><tr><th>Modell (IKEA neu)</th><th>Bezug</th><th>Masse B × T × H</th><th class="r">Preis</th><th>Einschätzung</th></tr></thead>
     <tbody>
+      <tr><td><a href="https://www.ikea.com/ch/de/p/glostad-3er-sofa-mit-recamiere-knisa-dunkelgrau-s89542669/"><b>GLOSTAD 3er-Sofa mit Récamiere (deine Wahl)</b></a></td><td>Knisa dunkelgrau</td><td class="num">171 × 78 × 68 cm, Récamiere 146 tief</td><td class="r num">CHF 199.00 <small>(statt 249)</small></td><td>Günstig, kompakt, mit Liegeteil. Im 3D-Modell 70 cm weiter Richtung Küche gerückt. Bis zum TV sind es jetzt ca. 2.6 m.</td></tr>
       <tr><td><a href="https://www.ikea.com/ch/de/p/soederhamn-3er-sofa-fridtuna-hellbeige-s89449690/">SÖDERHAMN 3er-Sofa</a></td><td>Fridtuna hellbeige</td><td class="num">198 × 99 × 83 cm</td><td class="r num">CHF 699.00</td><td>Passt am besten zum Stil: niedrig und modular. Der Bezug ist abnehmbar und waschbar.</td></tr>
       <tr><td><a href="https://www.ikea.com/ch/de/p/soederhamn-3er-sofa-blekinge-weiss-s29501761/">SÖDERHAMN 3er-Sofa</a></td><td>Blekinge weiss</td><td class="num">198 × 99 × 83 cm</td><td class="r num">CHF 599.00</td><td>Günstigster SÖDERHAMN-Bezug. Weiss ist allerdings heikel.</td></tr>
       <tr><td><a href="https://www.ikea.com/ch/de/p/kivik-3er-sofa-tresund-hellbeige-s89482830/">KIVIK 3er-Sofa</a></td><td>Tresund hellbeige</td><td class="num">228 × 95 × 83 cm</td><td class="r num">CHF 599.00 <small>(statt 699)</small></td><td>Tiefer und bequemer. Mit 2.28 m aber recht lang für die Wohnecke.</td></tr>
@@ -329,15 +330,15 @@ const CATS = [
     alt: 'Passend zum Holzlook wäre der MALM 2 Schubladen in Eichenfurnier, 40 × 48 × 55 cm, CHF 49.95.'
   },
   {
-    id: 'kommode', name: 'Kommode Schlafzimmer (noch offen)', where: 'Schlafzimmer', rec: 'ikea',
-    ikea: { name: 'MALM Kommode mit 3 Schubladen, Eichenfurnier weiss lasiert (mein Vorschlag, nicht in deiner Liste)', price: 99.95, priceNote: 'zeitweise CHF 74.95 im Einrichtungshaus', dims: '80 × 48 × 78 cm',
-      url: 'https://www.ikea.com/ch/de/cat/kommoden-10451/f/beige-kommoden-f-colors--10003/',
-      avail: 'Standardsortiment, Mitnahme. Muss an der Wand befestigt werden', resale: [40, 55] },
+    id: 'kommode', name: 'Kommode Schlafzimmer', where: 'Schlafzimmer, Nordwand unter dem Fenster', rec: 'ikea',
+    ikea: { name: 'STORKLINTA Kommode mit 6 Schubladen, weiss (deine Wahl)', price: 149.00, dims: '140 × 50 × 75 cm',
+      url: 'https://www.ikea.com/ch/de/p/storklinta-kommode-mit-6-schubladen-weiss-70627550/',
+      avail: '3 Pakete, schwerstes ca. 38 kg. Muss an der Wand befestigt werden', resale: [50, 80] },
     gal: { name: 'Songmics Ingrid Kommode (7 Stoffschubladen, Stahlgestell)', price: 49.50, priceNote: 'gesehen CHF 46.50–51.90', dims: '98.8 × 30 × 73.7 cm',
       url: 'https://www.galaxus.ch/de/search?q=Songmics%20Ingrid',
       avail: 'Versand. Bewertung 4.5/5', resale: [10, 15] },
-    why: 'In deiner Liste fehlt die Kommode. Ich habe meinen Vorschlag drin gelassen, du kannst die Kategorie unten abwählen. Feste Schubladen auf Metallschienen halten auch Ab- und Aufbau aus. Die Ingrid ist eher ein Stoffboxen-Regal: günstig und leicht, aber sie sieht schnell billig aus und hat fast keinen Wiederverkaufswert.',
-    alt: 'Mehr Stauraum: KULLEN 6 Schubladen, 140 × 40 × 72 cm, ab CHF 125.00 (weiss).'
+    why: 'Deine Wahl: 238 Liter Stauraum. Mit 75 cm Höhe passt sie unter das Fenster zum Balkon (Brüstung ca. 90 cm), und die Wand zum Bad bleibt frei. Einen Kleiderschrank im Zimmer gibt es laut den Fotos nicht. Die Kommode ersetzt ihn zusammen mit dem Einbauschrank im Reduit.',
+    alt: 'Kleiner: MALM 3 Schubladen Eichenfurnier, 80 × 48 × 78 cm, CHF 99.95.'
   },
   {
     id: 'tv', name: 'Kleiner TV-Tisch', where: 'Wohnen', rec: 'ikea',
@@ -362,26 +363,26 @@ const CATS = [
     alt: 'Günstiger: BORGEBY Birkenfurnier Ø 70 cm, CHF 129.00 (<a href="https://www.ikea.com/ch/de/p/borgeby-couchtisch-birkenfurnier-70389356/">Link</a>), oder VITTSJÖ schwarzbraun/Glas Ø 75 cm, CHF 79.95.'
   },
   {
-    id: 'badregal', name: 'Offenes Badregal (Bambus)', where: 'Bad, Ostwand gegenüber WC', rec: 'ikea',
-    ikea: { name: 'RÅGRUND Regal, Bambus', price: 49.95, dims: '37 × 37 × 104 cm',
-      url: 'https://www.ikea.com/ch/de/p/ragrund-regal-bambus-80549420/',
-      avail: 'Standardsortiment, Mitnahme. Lackierter Bambus, für feuchte Räume gemacht', resale: [20, 30] },
-    gal: { name: 'Relaxdays Badregal Bambus, 3 Ablagen', price: 60.00, priceNote: 'ca. CHF 60–65 laut Bestsellerliste, Produktseite ohne Preis im Index', dims: '33 × 25.5 × 119 cm',
+    id: 'badregal', name: 'Badregal (2 Stück)', where: 'Bad, Ostwand gegenüber WC', rec: 'ikea', qty: 2,
+    ikea: { name: 'VESKEN Regal, schwarz (deine Wahl)', price: 14.95, dims: '37 × 23 × 101 cm, Kunststoff, 4 kg pro Boden',
+      url: 'https://www.ikea.com/ch/de/p/vesken-regal-schwarz-30450807/',
+      avail: 'Standardsortiment, Mitnahme. Auch in Weiss', resale: [3, 8] },
+    gal: { name: 'Relaxdays Badregal Bambus, 3 Ablagen', price: 60.00, priceNote: 'ca. CHF 60–65 laut Bestsellerliste', dims: '33 × 25.5 × 119 cm',
       url: 'https://www.galaxus.ch/de/s14/product/relaxdays-badregal-33-x-2550-x-119-cm-badezimmerregal-13873470',
-      avail: 'Versand, Lieferzeit auf der Produktseite prüfen', resale: [5, 15] },
-    why: 'RÅGRUND ist der IKEA-Klassiker fürs Bad: Bambus mit Klarlack verträgt Feuchtigkeit, und es kostet weniger als das Galaxus-Regal. Im 3D-Modell steht es an der Ostwand des Bads, gegenüber dem WC. Dort bleiben ca. 90 cm Durchgang, und es ist weg vom Spritzbereich der Dusche.',
-    alt: 'Mehr Stauraum auf gleicher Fläche: RÅGRUND Regal 33 cm breit, 28 cm tief, ca. 163 cm hoch, CHF 59.95 (<a href="https://www.ikea.com/ch/de/p/ragrund-regal-bambus-30253067/">Link</a>). Fürs Eck über dem Lavabo: RÅGRUND Eckregal 34 × 60 cm, CHF 34.95.'
+      avail: 'Versand', resale: [5, 15] },
+    why: 'Deine Wahl: Zwei VESKEN nebeneinander kosten zusammen CHF 29.90. Das schwarze Kunststoffregal ist unempfindlich gegen Feuchtigkeit und mit 23 cm sehr schmal. Im Bad bleiben so rund 1 m Durchgang.',
+    alt: 'Alternative aus Bambus: RÅGRUND 37 × 37 × 104 cm, CHF 49.95.'
   },
   {
-    id: 'balkon', name: 'Balkongarnitur', where: 'Balkon (ca. 1.9 × 3.6 m)', rec: 'ikea',
+    id: 'balkon', name: 'Balkongarnitur', where: 'Balkon (ca. 1.9 × 3.6 m)', rec: 'gal',
     ikea: { name: 'TÄRNÖ Tisch + 2 Stühle faltbar mit Kuddarna-Kissen + 1 zusätzlicher TÄRNÖ-Stuhl (deine Wahl)', price: 104.95, priceNote: 'Set CHF 84.95 + Stuhl CHF 20.00 (ohne Kissen)', dims: 'Tisch 55 × 54 × 70 cm, Stuhl 39 × 40 × 79 cm (klappbar)',
       url: 'https://www.ikea.com/ch/de/p/taernoe-tisch-2-stuehle-aussen-schwarz-hellbraun-lasiert-faltbar-faltbar-kuddarna-helles-graubeige-s29575342/',
       url2: 'https://www.ikea.com/ch/de/p/taernoe-stuhl-aussen-faltbar-schwarz-hellbraun-lasiert-90095428/',
       avail: 'Saisonartikel, im Oktober/November evtl. reduziertes Lager. Vorher prüfen', resale: [40, 55] },
-    gal: { name: 'tectake Palese Rattan-Lounge (Bank, 2 Sessel, Glastisch)', price: 130.90, priceNote: 'gesehen CHF 119.52–149.90', dims: 'Masse fehlen auf Galaxus (Datenfehler «1104 cm»). Vor Kauf prüfen',
-      url: 'https://www.galaxus.ch/de/s4/product/tectake-rattan-gartenset-palese-fuer-4-personen-gartenlounge-54773834',
+    gal: { name: 'tectake Palese Rattan-Lounge (Bank, 2 Sessel, Glastisch), deine Wahl', price: 149.90, priceNote: 'gesehen CHF 119.52–149.90', dims: 'Bank 104 × 57 × 79, Sessel 57 × 57 × 79, Tisch 72 × 39.5 × 41 cm (Händlerangabe Hornbach)',
+      url: 'https://www.galaxus.ch/en/s4/product/tectake-palese-garden-lounges-54773832',
       avail: 'Versand. Bewertung 4.6–4.8/5', resale: [40, 60] },
-    why: 'Akazie mit schwarzem Stahl trifft deinen Stil genau, und klappbar heisst: im Winter weg. Auf ca. 1.9 m Balkontiefe braucht das Set nur ca. 1.3 × 1.3 m. Die Palese-Lounge wäre gemütlicher, aber Polyrattan mit Glastisch wirkt weniger Japandi und füllt den schmalen Balkon fast komplett.',
+    why: 'Deine Wahl: Die Palese ist deutlich bequemer als die TÄRNÖ-Klappstühle und kostet nur rund CHF 45 mehr. Im 3D-Modell steht die Bank an der Südwand des Balkons, Tisch und Sessel davor. So bleibt entlang der Glasfront ein Weg von gut 70 cm zur Schiebetür. Polyrattan verkauft sich später schlechter als IKEA, im Frühling aber durchaus.',
     alt: 'Für den dritten Stuhl fehlt noch ein Kissen. Ich würde die Garnitur ehrlich gesagt erst im März kaufen, dann ist die Auswahl grösser und der Balkon wird überhaupt benutzt.'
   }
 ];
@@ -441,7 +442,7 @@ const SOURCES = [
 const fmt = n => 'CHF ' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
 const fmt0 = n => 'CHF ' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
 const BUDGET = 1500;
-const KEY = 'kesslerplatz-einkauf-v2';
+const KEY = 'kesslerplatz-einkauf-v3';
 
 let state = { pick: {}, extras: {} };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.pick) state = s; } catch (e) {}
