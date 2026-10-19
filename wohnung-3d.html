@@ -78,6 +78,13 @@
     padding: 8px 14px; border-radius: 99px; font-size: 13px; display: none; z-index: 6; pointer-events: none; }
   #cross { position: fixed; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%;
     border: 2px solid rgba(255,255,255,.85); display: none; z-index: 6; pointer-events: none; box-shadow: 0 0 2px rgba(0,0,0,.6); }
+  #tourbar { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); width: min(640px, calc(100% - 32px));
+    background: rgba(20,18,16,.80); color: #fff; padding: 12px 16px; border-radius: 12px; display: none; z-index: 6; text-align: center; }
+  #tourbar button { color: #fff; border-color: rgba(255,255,255,.35); }
+  #tourcap { font-size: 16px; font-weight: 600; min-height: 1.4em; }
+  .tprog { height: 4px; background: rgba(255,255,255,.2); border-radius: 99px; margin-top: 8px; overflow: hidden; }
+  .tprog span { display: block; height: 100%; width: 0; background: #c9a77c; }
+  body.capture #panel, body.capture #compass, body.capture #tourbar .row { display: none !important; }
   #compass { position: fixed; right: 16px; top: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 50%;
     width: 40px; height: 40px; display: grid; place-items: center; font-weight: 700; font-size: 12px; z-index: 4; }
 
@@ -112,6 +119,13 @@
 <div id="compass" title="Norden">N↑</div>
 <div id="egohint">Klicken zum Umsehen · <b>WASD</b> laufen · <b>←/→</b> drehen · <b>Esc</b> Maus freigeben</div>
 <div id="cross"></div>
+<div id="tourbar">
+  <div id="tourcap"></div>
+  <div class="tprog"><span id="tourprog"></span></div>
+  <div class="row" style="justify-content:center;margin-top:8px">
+    <button id="tour-play">Pause</button><button id="tour-restart">Von vorn</button><button id="tour-exit">Beenden</button>
+  </div>
+</div>
 
 <aside id="panel">
   <div class="head">
@@ -133,6 +147,7 @@
       <button data-view="orbit">3D-Orbit</button>
       <button data-view="top">Draufsicht</button>
       <button data-view="ego">Ego</button>
+      <button data-view="tour">Rundgang</button>
     </div>
     <div class="toggles" style="margin-top:8px">
       <label><input type="checkbox" id="t-labels" checked> Beschriftung</label>
@@ -140,6 +155,9 @@
       <label><input type="checkbox" id="t-paths"> Laufwege</label>
       <label><input type="checkbox" id="t-low"> Wände halbhoch</label>
     </div>
+    <label style="display:flex;gap:6px;align-items:flex-start;margin-top:6px;cursor:pointer">
+      <input type="checkbox" id="t-hypo" style="margin-top:3px"> <span>Hypothese: Kleider-Einbauschrank an der Ostwand im Zimmer (60 cm tief)</span>
+    </label>
 
     <h2>Auswahl</h2>
     <div class="card" id="sel">
@@ -164,7 +182,7 @@
     <div class="note">
       Wände, Türen und Fenster stammen aus dem Grundriss 1:100, auf ca. ±3 cm genau vermessen. Raumhöhe 2.50 m (von dir).
       <b>Annahmen:</b> Fenster raumhoch, Türhöhe 2.10 m, Sofa = SÖDERHAMN 3er als Platzhalter,
-      dein Esstisch 140 × 80 cm mit 4 Stühlen (Masse bitte nachliefern), TV 55″.
+      Esstisch rund Ø 100 cm (von dir) mit 4 Stühlen à 45 × 50 cm (Stuhlmasse angenommen), TV 55″.
       Unklar: der geschlossene Block oben links (Schacht?) und das Element im Reduit.
     </div>
   </div>
@@ -257,9 +275,9 @@ const IK = 'https://www.ikea.com/ch/de/p/';
 const CAT = {
   sofa: { name: 'Sofa SÖDERHAMN 3er', note: 'Platzhalter, du suchst gebraucht', shop: '–', price: null, w: 1.98, d: 0.99, h: 0.83,
     kind: 'sofa', mat: 'fabricBeige', clear: { front: [0.25, 0.30] }, access: 'sofa', url: IK + 'soederhamn-3er-sofa-fridtuna-hellbeige-s89449690/' },
-  diningTable: { name: 'Esstisch (Bestand)', note: 'Masse angenommen', shop: 'Bestand', price: null, w: 1.40, d: 0.80, h: 0.75,
-    kind: 'table', top: 'woodLight', legs: 'woodLight', type: 'table' },
-  diningChair: { name: 'Stuhl (Bestand)', note: 'Masse angenommen', shop: 'Bestand', price: null, w: 0.45, d: 0.50, h: 0.80,
+  diningTable: { name: 'Esstisch rund Ø 100 (Bestand)', shop: 'Bestand', price: null, w: 1.00, d: 1.00, h: 0.75,
+    kind: 'roundTable', top: 'woodLight', legs: 'woodLight', type: 'table', round: true },
+  diningChair: { name: 'Stuhl (Bestand)', note: 'Stuhlmasse angenommen', shop: 'Bestand', price: null, w: 0.45, d: 0.50, h: 0.80,
     kind: 'chair', seat: 'black', legs: 'black', type: 'chair', access: 'chair' },
   // IKEA
   bissa: { name: 'BISSA Schuhschrank', shop: 'IKEA', price: 29.95, w: 0.49, d: 0.28, h: 0.93, kind: 'cabinet', mat: 'oak', fronts: [1, 1],
@@ -293,7 +311,7 @@ const CAT = {
     clear: { front: [0.6, 0.8] }, access: 'front', url: 'https://www.galaxus.ch/de/search?q=Songmics%20Ingrid' },
   bianca: { name: 'Songmics Bianca TV-Möbel', shop: 'Galaxus', price: 64.00, w: 1.20, d: 0.40, h: 0.495, kind: 'cabinet', mat: 'white', fronts: [1, 1],
     legs: 0.12, legMat: 'rubberwood', tv: true, access: 'any', url: 'https://www.galaxus.ch/de/search?q=Songmics%20Bianca%20TV' },
-  vasagleRound: { name: 'Vasagle Couchtisch rund', shop: 'Galaxus', price: 101.00, w: 0.80, d: 0.80, h: 0.45, kind: 'roundTable', top: 'oak', legs: 'steel',
+  vasagleRound: { name: 'Vasagle Couchtisch rund', shop: 'Galaxus', price: 101.00, w: 0.80, d: 0.80, h: 0.45, kind: 'roundTable', top: 'oak', legs: 'steel', shelf: true, round: true,
     type: 'table', url: 'https://www.galaxus.ch/de/s14/product/vasagle-couchtisch-80-x-80-x-45-cm-couchtisch-beistelltisch-67117474' },
   ragrund: { name: 'RÅGRUND Regal Bambus', shop: 'IKEA', price: 49.95, w: 0.37, d: 0.37, h: 1.04, kind: 'shelf', mat: 'bamboo', shelves: 4,
     clear: { front: [0.6, 0.7] }, access: 'front', url: IK + 'ragrund-regal-bambus-80549420/' },
@@ -309,11 +327,11 @@ const CAT = {
 
 const SHARED = [
   { id: 'sofa', cat: 'sofa', x: 4.35, z: 3.295, rot: 0 },
-  { id: 'esstisch', cat: 'diningTable', x: 7.40, z: 3.59, rot: 90 },
-  { id: 'stuhl1', cat: 'diningChair', x: 6.74, z: 3.25, rot: 90 },
-  { id: 'stuhl2', cat: 'diningChair', x: 6.74, z: 3.93, rot: 90 },
-  { id: 'stuhl3', cat: 'diningChair', x: 7.40, z: 2.63, rot: 0 },
-  { id: 'stuhl4', cat: 'diningChair', x: 7.40, z: 4.55, rot: 180 },
+  { id: 'esstisch', cat: 'diningTable', x: 7.00, z: 3.60, rot: 0 },
+  { id: 'stuhl1', cat: 'diningChair', x: 6.30, z: 3.60, rot: 90 },
+  { id: 'stuhl2', cat: 'diningChair', x: 7.70, z: 3.60, rot: -90 },
+  { id: 'stuhl3', cat: 'diningChair', x: 7.00, z: 2.90, rot: 0 },
+  { id: 'stuhl4', cat: 'diningChair', x: 7.00, z: 4.30, rot: 180 },
 ];
 const DEFAULTS = {
   ikea: [
@@ -349,14 +367,14 @@ const DEFAULTS = {
 // ---------------------------------------------------------------------------
 // Zustand (localStorage nur als Komfort)
 // ---------------------------------------------------------------------------
-const STORE = 'kesslerplatz-3d-v1';
+const STORE = 'kesslerplatz-3d-v2';
 let saved = {};
 try { saved = JSON.parse(localStorage.getItem(STORE)) || {}; } catch (e) { saved = {}; }
 const state = {
   variant: saved.variant === 'galaxus' ? 'galaxus' : 'ikea',
   view: 'orbit',
   layouts: { ikea: {}, galaxus: {} },
-  toggles: Object.assign({ labels: true, dist: true, paths: false, low: false }, saved.toggles || {}),
+  toggles: Object.assign({ labels: true, dist: true, paths: false, low: false, hypo: false }, saved.toggles || {}),
 };
 for (const v of ['ikea', 'galaxus']) {
   for (const d of DEFAULTS[v]) {
@@ -423,6 +441,11 @@ fitOrtho();
 
 scene.add(new THREE.HemisphereLight(0xfffaf0, 0xb8ad9c, 1.25));
 scene.add(new THREE.AmbientLight(0xfff6ea, 0.35));
+// Deckenleuchten für Innenansichten (Decke schattet die Sonne ab)
+const roomLights = new THREE.Group(); roomLights.visible = false; scene.add(roomLights);
+for (const [x, z, i] of [[4.6, 2.6, 9], [6.9, 3.4, 7], [2.3, 7.4, 8], [5.4, 7.6, 5], [7.3, 6.4, 4], [1.1, 3.3, 4]]) {
+  const l = new THREE.PointLight(0xffe8c8, i, 7, 1.6); l.position.set(x, 2.35, z); roomLights.add(l);
+}
 const sun = new THREE.DirectionalLight(0xfff1dc, 1.6);
 sun.position.set(-3, 14, 3);
 sun.target.position.copy(CENTER);
@@ -741,7 +764,7 @@ const BUILD = {
   roundTable(c) {
     const g = new THREE.Group(), r = c.w / 2;
     g.add(cyl(r, 0.025, MAT[c.top], 0, c.h - 0.025, 0));
-    g.add(cyl(r * 0.85, 0.018, MAT[c.top], 0, 0.12, 0));
+    if (c.shelf) g.add(cyl(r * 0.85, 0.018, MAT[c.top], 0, 0.12, 0));
     for (let i = 0; i < 4; i++) {
       const a = i * Math.PI / 2 + Math.PI / 4;
       g.add(box(0.025, c.h - 0.025, 0.025, MAT[c.legs], Math.cos(a) * r * 0.72, 0, Math.sin(a) * r * 0.72));
@@ -864,12 +887,18 @@ function sectorPoly(dr) {
   return pts;
 }
 // statische Hindernisse auf Bodenhöhe
-const STATIC_OBS = [
+const BASE_OBS = [
   ...WALLS.map(r => ({ name: 'Wand', poly: rectPoly(r) })),
   ...OPENINGS.filter(o => o.kind === 'window').map(o => ({ name: 'Fenster', poly: rectPoly(o.r) })),
   ...RAILINGS.map(r => ({ name: 'Geländer', poly: rectPoly(r) })),
   ...BUILTINS.filter(b => !b.noFloor).map(b => ({ name: b.name, poly: rectPoly(b.r) })),
 ];
+// Hypothese: Kleiderschrank an der Ostwand des Zimmers, ausserhalb des Türaufschlags
+const HYPO_WARDROBE = { name: 'Einbauschrank (Hypothese)', r: [3.55, 6.45, 4.15, 9.65], h: 2.3 };
+let STATIC_OBS = BASE_OBS;
+function rebuildObs() {
+  STATIC_OBS = state.toggles.hypo ? [...BASE_OBS, { name: HYPO_WARDROBE.name, poly: rectPoly(HYPO_WARDROBE.r) }] : BASE_OBS;
+}
 const DOOR_SECTORS = DOORS.map(d => ({ name: d.name, poly: sectorPoly(d) }));
 
 function activeItems() {
@@ -878,6 +907,10 @@ function activeItems() {
 }
 function footprint(it) {
   const s = state.layouts[state.variant][it.id];
+  if (it.c.round) {
+    const r = it.c.w / 2;
+    return Array.from({ length: 16 }, (_, i) => [s.x + Math.cos(i * Math.PI / 8) * r, s.z + Math.sin(i * Math.PI / 8) * r]);
+  }
   return obbPoly(s.x, s.z, it.c.w, it.c.d, s.rot);
 }
 const isTuck = (a, b) => (a.c.type === 'chair' && b.c.type === 'table') || (a.c.type === 'table' && b.c.type === 'chair');
@@ -1204,9 +1237,17 @@ function setView(v) {
   if (state.view === 'ego' && v !== 'ego') ego.unlock();
   state.view = v;
   orbit.enabled = v === 'orbit'; topCtl.enabled = v === 'top';
-  ceiling.visible = v === 'ego';
+  ceiling.visible = v === 'ego' || v === 'tour';
+  roomLights.visible = ceiling.visible;
   $('egohint').style.display = v === 'ego' ? 'block' : 'none';
   $('cross').style.display = v === 'ego' ? 'block' : 'none';
+  $('tourbar').style.display = v === 'tour' ? 'block' : 'none';
+  if (v === 'tour') {
+    select(null);
+    if (state.toggles.low) { state.toggles.low = false; $('t-low').checked = false; buildWalls(false); }
+    if (!$('panel').classList.contains('collapsed')) $('collapse').click();
+    tour.t = 0; tour.playing = true; $('tour-play').textContent = 'Pause'; tourAt(0);
+  }
   if (v === 'ego') {
     egoCam.position.set(6.95, 1.62, 5.05);
     egoCam.rotation.set(0, Math.PI / 2 - 0.3, 0);
@@ -1216,10 +1257,13 @@ function setView(v) {
   renderHeader();
 }
 function labelsVisible() {
-  const show = state.toggles.labels && state.view !== 'ego';
+  const inside = state.view === 'ego' || state.view === 'tour';
+  const show = state.toggles.labels && !inside;
   for (const v of ['ikea', 'galaxus']) for (const it of Object.values(items[v])) it.lbl.userData.want = show;
-  roomLabels.visible = state.view !== 'ego';
-  overlayRoot.visible = state.view !== 'ego';
+  roomLabels.visible = !inside;
+  overlayRoot.visible = !inside;
+  pathRoot.visible = state.toggles.paths && !inside;
+  hypoGroup.children.forEach(o => { if (o.isCSS2DObject) o.userData.want = !inside; });
 }
 // CSS2DRenderer beachtet nur die eigene Sichtbarkeit, nicht die der Eltern: hier nachziehen
 function syncLabelVisibility() {
@@ -1230,7 +1274,7 @@ function syncLabelVisibility() {
     o.visible = vis;
   });
 }
-const activeCam = () => state.view === 'top' ? ortho : state.view === 'ego' ? egoCam : persp;
+const activeCam = () => state.view === 'top' ? ortho : (state.view === 'ego' || state.view === 'tour') ? egoCam : persp;
 
 // Ziehen und Auswählen
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -1242,6 +1286,7 @@ function pick(ev) {
 }
 function floorHit() { const p = new THREE.Vector3(); return ray.ray.intersectPlane(floorPlane, p) ? p : null; }
 renderer.domElement.addEventListener('pointerdown', ev => {
+  if (state.view === 'tour') return;
   if (state.view === 'ego') { if (!ego.isLocked) ego.lock(); return; }
   if (ev.button !== 0) return;
   pick(ev);
@@ -1283,6 +1328,11 @@ addEventListener('keydown', ev => {
   if (ev.target.tagName === 'INPUT') return;
   keys[ev.code] = true;
   if (ev.key === 'Shift') { orbit.enableZoom = false; topCtl.enableZoom = false; }
+  if (state.view === 'tour') {
+    if (ev.code === 'Space') { ev.preventDefault(); $('tour-play').click(); }
+    if (ev.code === 'Escape') setView('orbit');
+    return;
+  }
   if (state.view === 'ego') return;
   if (ev.code === 'KeyR') rotateSel(90);
   if (ev.code === 'KeyQ') rotateSel(-15);
@@ -1326,6 +1376,13 @@ bindToggle('t-labels', 'labels', labelsVisible);
 bindToggle('t-dist', 'dist', () => evaluate(false));
 bindToggle('t-paths', 'paths', () => { pathRoot.visible = state.toggles.paths; });
 bindToggle('t-low', 'low', () => buildWalls(state.toggles.low));
+bindToggle('t-hypo', 'hypo', () => { rebuildObs(); hypoGroup.visible = state.toggles.hypo; evaluate(); });
+$('tour-play').onclick = () => {
+  if (tour.t >= TOUR_END) tour.t = 0;
+  tour.playing = !tour.playing; $('tour-play').textContent = tour.playing ? 'Pause' : 'Weiter';
+};
+$('tour-restart').onclick = () => { tour.t = 0; tour.playing = true; $('tour-play').textContent = 'Pause'; };
+$('tour-exit').onclick = () => setView('orbit');
 $('reset').onclick = () => {
   for (const d of DEFAULTS[state.variant]) state.layouts[state.variant][d.id] = { x: d.x, z: d.z, rot: d.rot, on: true };
   select(null); syncVariant(); persist(); renderHeader(); evaluate();
@@ -1338,6 +1395,75 @@ addEventListener('resize', () => {
   fitOrtho();
 });
 
+// ---------------------------------------------------------------------------
+// Rundgang: Kamerafahrt in Augenhöhe durch die Wohnung (Zeit in Sekunden)
+// ---------------------------------------------------------------------------
+const EYE = 1.6;
+const TOUR = [
+  { t: 0, p: [7.75, 6.60], l: [7.0, 1.45, 4.0], stop: true, cap: 'Eingang: hinter dir die Wohnungstür, links das Bad' },
+  { t: 4, p: [7.55, 6.20], l: [6.0, 1.40, 3.0] },
+  { t: 7, p: [7.15, 5.00], l: [4.4, 1.10, 3.6], cap: 'Wohnzimmer mit Sofa, Couchtisch und TV-Bank' },
+  { t: 11, p: [5.85, 4.75], l: [3.8, 0.90, 3.4], stop: true },
+  { t: 15, p: [5.85, 4.75], l: [4.3, 1.00, 5.3], stop: true },
+  { t: 19, p: [3.15, 4.60], l: [1.0, 1.20, 3.0], cap: 'Fensterfront mit Schiebetür zum Balkon' },
+  { t: 23, p: [2.75, 2.75], l: [0.8, 1.00, 3.2], stop: true },
+  { t: 27, p: [1.75, 2.35], l: [1.0, 0.70, 3.4], cap: 'Balkon' },
+  { t: 30, p: [1.75, 2.35], l: [5.0, 1.30, 2.5], stop: true, cap: 'Blick vom Balkon zurück in die Wohnung' },
+  { t: 34, p: [3.30, 2.15], l: [6.0, 1.20, 1.2] },
+  { t: 38, p: [5.20, 1.75], l: [6.8, 1.00, 0.4], stop: true, cap: 'Küche' },
+  { t: 42, p: [6.25, 2.20], l: [7.2, 0.80, 3.8], stop: true, cap: 'Essplatz am Ostfenster: dein runder Tisch Ø 100 cm' },
+  { t: 45, p: [5.70, 3.30], l: [5.0, 1.20, 5.5] },
+  { t: 48, p: [5.75, 4.75], l: [3.2, 1.30, 5.6] },
+  { t: 52, p: [3.20, 5.00], l: [3.2, 1.40, 7.0], cap: 'Durch die Tür ins Schlafzimmer' },
+  { t: 55, p: [3.20, 6.10], l: [2.3, 0.80, 8.6] },
+  { t: 58, p: [3.00, 6.70], l: [2.0, 0.70, 8.9], stop: true, cap: 'Schlafzimmer mit Bett 140 × 200' },
+  { t: 62, p: [3.35, 7.60], l: [1.5, 0.90, 8.4], stop: true },
+  { t: 66, p: [3.25, 6.00], l: [3.2, 1.40, 4.8] },
+  { t: 69, p: [3.40, 4.95], l: [6.5, 1.40, 5.6] },
+  { t: 73, p: [6.10, 4.95], l: [7.2, 1.40, 6.2] },
+  { t: 76, p: [7.05, 6.05], l: [5.5, 1.20, 6.3], cap: 'Ins Bad' },
+  { t: 79, p: [5.90, 6.25], l: [5.0, 0.90, 8.2] },
+  { t: 82, p: [5.85, 6.75], l: [6.1, 0.80, 7.9], stop: true, cap: 'Bad mit Bambusregal gegenüber dem WC' },
+  { t: 87, p: [5.85, 6.75], l: [4.9, 0.80, 8.8], stop: true },
+];
+const TOUR_END = TOUR[TOUR.length - 1].t;
+const tourPosCurve = new THREE.CatmullRomCurve3(TOUR.map(k => new THREE.Vector3(k.p[0], EYE, k.p[1])), false, 'centripetal');
+const tourLookCurve = new THREE.CatmullRomCurve3(TOUR.map(k => new THREE.Vector3(...k.l)), false, 'centripetal');
+const tour = { t: 0, playing: false };
+function tourAt(t) {
+  t = Math.max(0, Math.min(TOUR_END, t));
+  let i = 0; while (i < TOUR.length - 2 && TOUR[i + 1].t <= t) i++;
+  const a = TOUR[i], b = TOUR[i + 1];
+  let s = (t - a.t) / (b.t - a.t);
+  // weich anfahren/abbremsen an Haltepunkten
+  if (a.stop && b.stop) s = s * s * (3 - 2 * s);
+  else if (b.stop) s = Math.sin(s * Math.PI / 2);
+  else if (a.stop) s = 1 - Math.cos(s * Math.PI / 2);
+  const u = (i + s) / (TOUR.length - 1);
+  // Kurven gehen bei u = i/(n-1) exakt durch die Wegpunkte (nicht nach Bogenlänge)
+  egoCam.position.copy(tourPosCurve.getPoint(u));
+  egoCam.lookAt(tourLookCurve.getPoint(u));
+  let cap = ''; for (const k of TOUR) if (k.t <= t + 1e-6 && k.cap) cap = k.cap;
+  $('tourcap').textContent = cap;
+  $('tourprog').style.width = (t / TOUR_END * 100) + '%';
+}
+
+// Hypothese Einbauschrank: halbtransparent, nur sichtbar wenn eingeschaltet
+const hypoGroup = new THREE.Group(); scene.add(hypoGroup);
+{
+  const [x0, z0, x1, z1] = HYPO_WARDROBE.r;
+  const m = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, HYPO_WARDROBE.h, z1 - z0),
+    new THREE.MeshStandardMaterial({ color: 0xa8603b, transparent: true, opacity: 0.35, depthWrite: false }));
+  m.position.set((x0 + x1) / 2, HYPO_WARDROBE.h / 2, (z0 + z1) / 2);
+  hypoGroup.add(m);
+  const e = new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry), new THREE.LineBasicMaterial({ color: 0xa8603b }));
+  e.position.copy(m.position); hypoGroup.add(e);
+  const l = label('<b>Einbauschrank?</b><br><small>Hypothese, 60 × 320 cm</small>'); l.position.set((x0 + x1) / 2, 2.4, (z0 + z1) / 2);
+  hypoGroup.add(l);
+}
+hypoGroup.visible = state.toggles.hypo;
+rebuildObs();
+
 // Start
 buildWalls(state.toggles.low);
 syncVariant();
@@ -1348,13 +1474,40 @@ const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.05);
   if (state.view === 'ego') egoStep(dt);
+  else if (state.view === 'tour') {
+    if (tour.playing) {
+      tour.t += dt; tourAt(tour.t);
+      if (tour.t >= TOUR_END) { tour.playing = false; $('tour-play').textContent = 'Nochmal'; }
+    }
+  }
   else if (state.view === 'orbit') orbit.update(); else topCtl.update();
   const cam = activeCam();
   renderer.render(scene, cam);
   syncLabelVisibility();
   labelRenderer.render(scene, cam);
 });
-window.__kp = { state, evaluate, setView, items, get issues() { return issues; }, select, _ortho: ortho };
+window.__kp = { state, evaluate, setView, items, get issues() { return issues; }, select, _ortho: ortho, tour, tourAt, TOUR_END,
+  freezeShadows() { renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true; },
+  // Videoaufnahme: Renderschleife anhalten und Einzelbilder samt Untertitel als JPEG liefern
+  captureFrame(t) {
+    renderer.setAnimationLoop(null);
+    tourAt(t);
+    renderer.render(scene, egoCam);
+    const src = renderer.domElement, c = document.createElement('canvas');
+    c.width = src.width; c.height = src.height;
+    const g = c.getContext('2d'), k = c.height / 720;
+    g.drawImage(src, 0, 0);
+    const cap = $('tourcap').textContent;
+    if (cap) {
+      g.font = `600 ${Math.round(26 * k)}px -apple-system, Segoe UI, Inter, Roboto, sans-serif`;
+      const w = g.measureText(cap).width + 48 * k, h = 56 * k, x = (c.width - w) / 2, y = c.height - h - 34 * k;
+      g.fillStyle = 'rgba(20,18,16,.78)'; g.beginPath(); g.roundRect(x, y, w, h, 12 * k); g.fill();
+      g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(cap, c.width / 2, y + h / 2);
+    }
+    g.fillStyle = 'rgba(255,255,255,.25)'; g.fillRect(0, c.height - 6 * k, c.width, 6 * k);
+    g.fillStyle = '#c9a77c'; g.fillRect(0, c.height - 6 * k, c.width * Math.min(1, t / TOUR_END), 6 * k);
+    return c.toDataURL('image/jpeg', 0.9);
+  } };
 </script>
 </body>
 </html>
