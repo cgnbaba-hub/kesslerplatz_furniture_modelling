@@ -181,9 +181,10 @@
     <h2>Grundlagen</h2>
     <div class="note">
       Wände, Türen und Fenster stammen aus dem Grundriss 1:100, auf ca. ±3 cm genau vermessen. Raumhöhe 2.50 m (von dir).
-      <b>Annahmen:</b> Fenster raumhoch, Türhöhe 2.10 m, Sofa = SÖDERHAMN 3er als Platzhalter,
+      Materialien nach den Fotos der Musterwohnung: Holzdecke, Eichenparkett, weisse Küche mit Granit, Bad mit Korbmuster und Waschturm, Fenster mit Brüstung 0.90 m.
+      <b>Annahmen:</b> Türhöhe 2.10 m, Sofa = SÖDERHAMN 3er als Platzhalter,
       Esstisch rund Ø 100 cm (von dir) mit 4 Stühlen à 45 × 50 cm (Stuhlmasse angenommen), TV 55″.
-      Unklar: der geschlossene Block oben links (Schacht?) und das Element im Reduit.
+      Unklar: der geschlossene Block oben links (Schacht?). Das X-Element im Reduit ist vermutlich der Kleider-Einbauschrank.
     </div>
   </div>
 </aside>
@@ -198,7 +199,7 @@ import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer
 // Grundriss (Meter). x = Ost, z = Süd, y = oben. Ursprung: Aussenecke Nordwest.
 // Vermessen aus dem Plan 1:100 (1 m = 56.7 px im eingebetteten Rasterbild).
 // ---------------------------------------------------------------------------
-const H = 2.5, DOOR_H = 2.1, WIN_HEAD = 2.3;
+const H = 2.5, DOOR_H = 2.1, WIN_HEAD = 2.3, SILL = 0.9;
 
 // Massive Wandstücke [x0, z0, x1, z1] (volle Höhe)
 const WALLS = [
@@ -218,11 +219,12 @@ const WALLS = [
 ];
 // Öffnungen: Fenster (Glas) und Türen (Sturz)
 const OPENINGS = [
-  { kind: 'window', r: [8.13, 2.72, 8.54, 4.46], sill: 0, head: WIN_HEAD, name: 'Fenster Wohnen Ost' },
-  { kind: 'window', r: [0, 6.69, 0.40, 8.08], sill: 0, head: WIN_HEAD, name: 'Fenster Zimmer West' },
-  { kind: 'window', r: [1.02, 5.03, 1.99, 5.55], sill: 0, head: WIN_HEAD, name: 'Fenster Zimmer zum Balkon' },
-  { kind: 'window', r: [2.13, 3.48, 2.31, 5.03], sill: 0, head: WIN_HEAD, name: 'Fensterfront Balkon (fix)' },
-  { kind: 'slide', r: [2.13, 1.93, 2.31, 3.48], head: WIN_HEAD, name: 'Schiebetür Balkon' },
+  // Brüstung 0.90 m wie in der Musterwohnung (Fotos), Balkonfront raumhoch
+  { kind: 'window', r: [8.13, 2.72, 8.54, 4.46], sill: SILL, head: WIN_HEAD, panes: 2, inside: [-1, 0], name: 'Fenster Wohnen Ost' },
+  { kind: 'window', r: [0, 6.69, 0.40, 8.08], sill: SILL, head: WIN_HEAD, panes: 2, inside: [1, 0], name: 'Fenster Zimmer West' },
+  { kind: 'window', r: [1.02, 5.03, 1.99, 5.55], sill: SILL, head: WIN_HEAD, panes: 1, inside: [0, 1], name: 'Fenster Zimmer zum Balkon' },
+  { kind: 'window', r: [2.13, 3.48, 2.31, 5.03], sill: 0, head: WIN_HEAD, panes: 1, inside: [1, 0], name: 'Fensterfront Balkon (fix)' },
+  { kind: 'slide', r: [2.13, 1.93, 2.31, 3.48], head: WIN_HEAD, panes: 1, inside: [1, 0], name: 'Schiebetür Balkon' },
   { kind: 'door', r: [8.13, 5.85, 8.54, 6.90], head: DOOR_H },
   { kind: 'door', r: [2.77, 5.43, 3.60, 5.56], head: DOOR_H },
   { kind: 'door', r: [6.34, 5.66, 6.49, 6.49], head: DOOR_H },
@@ -244,12 +246,14 @@ const KEEP_CLEAR = [
 const RAILINGS = [[0, 1.53, 0.08, 5.03]];
 // Einbauten laut Plan
 const BUILTINS = [
-  { name: 'Küche Hochschränke', r: [3.58, 0.25, 5.37, 0.88], y0: 0, y1: 2.3, kind: 'tall' },
-  { name: 'Küche Unterschränke', r: [5.37, 0.25, 8.13, 0.88], y0: 0, y1: 0.9, kind: 'base' },
-  { name: 'Küche Oberschränke', r: [5.37, 0.25, 8.13, 0.62], y0: 1.45, y1: 2.2, kind: 'upper', noFloor: true },
-  { name: 'Einbauschrank Reduit (laut Plan)', r: [6.52, 8.78, 8.0, 9.40], y0: 0, y1: 2.2, kind: 'tall' },
-  { name: 'WC', r: [4.52, 7.28, 5.07, 7.66], y0: 0, y1: 0.42, kind: 'sanitary' },
-  { name: 'Lavabo', r: [4.52, 7.96, 5.02, 8.55], y0: 0.78, y1: 0.92, kind: 'sanitary', noFloor: true },
+  { name: 'Küche Hochschränke', r: [3.58, 0.25, 5.37, 0.88], y0: 0, y1: H, kind: 'tall', face: [0, 1] },
+  { name: 'Küche Unterschränke', r: [5.37, 0.25, 8.13, 0.88], y0: 0, y1: 0.9, kind: 'base', face: [0, 1] },
+  { name: 'Küche Oberschränke', r: [5.37, 0.25, 8.13, 0.60], y0: 1.45, y1: H, kind: 'upper', face: [0, 1], noFloor: true },
+  { name: 'Einbauschrank Reduit (vermutlich Kleiderschrank)', r: [6.52, 8.78, 8.0, 9.40], y0: 0, y1: H, kind: 'tall', face: [0, -1] },
+  { name: 'Waschturm', r: [4.30, 6.34, 4.92, 6.94], y0: 0, y1: 1.75, kind: 'washer', face: [1, 0] },
+  { name: 'WC', r: [4.52, 7.28, 5.07, 7.66], y0: 0.22, y1: 0.42, kind: 'wc', face: [1, 0] },
+  { name: 'Lavabo', r: [4.52, 7.96, 5.02, 8.55], y0: 0.78, y1: 0.92, kind: 'basin', face: [1, 0], noFloor: true },
+  { name: 'Spiegelschrank', r: [4.52, 7.98, 4.66, 8.53], y0: 1.25, y1: 1.95, kind: 'mirror', face: [1, 0], noFloor: true },
   { name: 'Vorwand Bad', r: [4.28, 6.96, 5.52, 7.03], y0: 0, y1: 1.2, kind: 'wallLow' },
   { name: 'Vorwand Bad', r: [4.27, 7.03, 4.52, 9.65], y0: 0, y1: 1.2, kind: 'wallLow' },
 ];
@@ -258,7 +262,7 @@ const ROOMS = [
   { name: 'Eingang', r: [6.49, 5.43, 8.13, 7.37], floor: 'parquet', label: [7.3, 7.1] },
   { name: 'Zimmer 15.5 m²', r: [0.40, 5.56, 4.15, 9.65], floor: 'parquet', label: [2.3, 6.3] },
   { name: 'Bad/WC 7.7 m²', r: [4.27, 5.56, 6.34, 9.65], floor: 'tile', label: [5.6, 6.2] },
-  { name: 'Reduit 3.0 m²', r: [6.49, 7.49, 8.13, 9.65], floor: 'tile', label: [7.3, 8.1] },
+  { name: 'Reduit 3.0 m²', r: [6.49, 7.49, 8.13, 9.65], floor: 'parquet', label: [7.3, 8.1] },
   { name: 'Balkon 7.2 m²', r: [0.08, 1.53, 2.13, 5.03], floor: 'deck', label: [1.0, 1.85] },
   { name: 'Schacht? (geschlossen)', r: [0.4, 0.4, 3.3, 1.2], floor: null, label: [1.9, 0.75], high: true },
 ];
@@ -413,7 +417,7 @@ const ortho = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
 ortho.position.set(CENTER.x, 40, CENTER.z);
 ortho.up.set(0, 0, -1);
 ortho.lookAt(CENTER.x, 0, CENTER.z);
-const egoCam = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.05, 100);
+const egoCam = new THREE.PerspectiveCamera(64, innerWidth / innerHeight, 0.05, 100);
 egoCam.rotation.order = 'YXZ';
 
 const orbit = new OrbitControls(persp, renderer.domElement);
@@ -443,9 +447,7 @@ scene.add(new THREE.HemisphereLight(0xfffaf0, 0xb8ad9c, 1.25));
 scene.add(new THREE.AmbientLight(0xfff6ea, 0.35));
 // Deckenleuchten für Innenansichten (Decke schattet die Sonne ab)
 const roomLights = new THREE.Group(); roomLights.visible = false; scene.add(roomLights);
-for (const [x, z, i] of [[4.6, 2.6, 9], [6.9, 3.4, 7], [2.3, 7.4, 8], [5.4, 7.6, 5], [7.3, 6.4, 4], [1.1, 3.3, 4]]) {
-  const l = new THREE.PointLight(0xffe8c8, i, 7, 1.6); l.position.set(x, 2.35, z); roomLights.add(l);
-}
+
 const sun = new THREE.DirectionalLight(0xfff1dc, 1.6);
 sun.position.set(-3, 14, 3);
 sun.target.position.copy(CENTER);
@@ -482,27 +484,77 @@ const fabricTex = canvasTex(128, (g, s) => {
   for (let i = 0; i < 2600; i++) { g.fillStyle = `rgba(0,0,0,${rnd() * 0.07})`; g.fillRect(rnd() * s, rnd() * s, 1.5, 1.5); }
 }, 2);
 const parquetTex = canvasTex(512, (g, s) => {
-  const pw = s / 4, pl = s / 1.5;
-  for (let col = 0; col < 4; col++) {
+  const pw = s / 6, pl = s / 1.2;
+  for (let col = 0; col < 6; col++) {
     let y = -rnd() * pl;
     while (y < s) {
-      const l = pl * (0.6 + rnd() * 0.6), v = 200 + rnd() * 30;
-      g.fillStyle = `rgb(${v + 22},${v + 2},${v - 34})`; g.fillRect(col * pw, y, pw, l);
+      const l = pl * (0.6 + rnd() * 0.6), v = 196 + rnd() * 34;
+      g.fillStyle = `rgb(${v + 18},${v - 10},${v - 58})`; g.fillRect(col * pw, y, pw, l);
       for (let k = 0; k < 6; k++) { g.strokeStyle = `rgba(120,85,50,${rnd() * 0.12})`; g.beginPath(); const xx = col * pw + rnd() * pw; g.moveTo(xx, y); g.lineTo(xx + rnd() * 3, y + l); g.stroke(); }
       g.strokeStyle = 'rgba(90,65,40,.35)'; g.strokeRect(col * pw + .5, y + .5, pw - 1, l - 1);
       y += l;
     }
   }
 });
+// Bad-Boden: schwarz-weisses Korbgeflecht wie auf den Fotos (2 Felder pro Kachel = 20 cm)
 const tileTex = canvasTex(256, (g, s) => {
-  g.fillStyle = '#d9d6d0'; g.fillRect(0, 0, s, s);
-  g.strokeStyle = '#b9b5ae'; g.lineWidth = 2;
-  for (let i = 0; i <= 4; i++) { g.beginPath(); g.moveTo(i * s / 4, 0); g.lineTo(i * s / 4, s); g.moveTo(0, i * s / 4); g.lineTo(s, i * s / 4); g.stroke(); }
+  const n = 4, c = s / n;
+  g.fillStyle = '#f1f0ec'; g.fillRect(0, 0, s, s);
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+    const x = i * c, y = j * c, hor = (i + j) % 2 === 0;
+    g.fillStyle = '#3d3b39';
+    if (hor) g.fillRect(x + c * 0.12, y + c * 0.36, c * 0.76, c * 0.28); else g.fillRect(x + c * 0.36, y + c * 0.12, c * 0.28, c * 0.76);
+    g.strokeStyle = '#bdb9b2'; g.lineWidth = 1.5; g.strokeRect(x + 0.5, y + 0.5, c - 1, c - 1);
+  }
 });
+// Wandfliesen: weiss, hochkant 7.5 x 30 cm, Fuge grau
+const wallTileTex = canvasTex(256, (g, s) => {
+  g.fillStyle = '#f3f1ec'; g.fillRect(0, 0, s, s);
+  g.strokeStyle = '#a9a59e'; g.lineWidth = 2;
+  for (let i = 0; i <= 8; i++) { g.beginPath(); g.moveTo(i * s / 8, 0); g.lineTo(i * s / 8, s); g.stroke(); }
+  for (let j = 0; j <= 2; j++) { g.beginPath(); g.moveTo(0, j * s / 2); g.lineTo(s, j * s / 2); g.stroke(); }
+});
+// Holzdecke: helle Fichtenbretter mit Ästen
+const pineTex = canvasTex(512, (g, s) => {
+  const bw = s / 5;
+  for (let b = 0; b < 5; b++) {
+    const v = 226 + rnd() * 16;
+    g.fillStyle = `rgb(${v},${v - 18},${v - 52})`; g.fillRect(0, b * bw, s, bw);
+    for (let k = 0; k < 18; k++) {
+      g.strokeStyle = `rgba(160,120,70,${0.05 + rnd() * 0.1})`; g.lineWidth = 0.6 + rnd() * 1.2;
+      const y = b * bw + rnd() * bw; g.beginPath(); g.moveTo(0, y);
+      for (let x = 0; x <= s; x += 32) g.lineTo(x, y + Math.sin(x * 0.02 + k) * 2);
+      g.stroke();
+    }
+    for (let k = 0; k < 2; k++) {
+      g.fillStyle = 'rgba(120,80,40,.45)'; g.beginPath();
+      g.ellipse(rnd() * s, b * bw + bw * (0.3 + rnd() * 0.4), 3 + rnd() * 4, 2 + rnd() * 2, 0, 0, Math.PI * 2); g.fill();
+    }
+    g.fillStyle = 'rgba(110,80,50,.35)'; g.fillRect(0, b * bw, s, 1.5);
+  }
+});
+const graniteTex = canvasTex(256, (g, s) => {
+  g.fillStyle = '#2b2b2c'; g.fillRect(0, 0, s, s);
+  for (let i = 0; i < 5000; i++) {
+    const v = rnd(); g.fillStyle = v > 0.85 ? 'rgba(200,200,205,.55)' : v > 0.5 ? 'rgba(90,90,95,.6)' : 'rgba(10,10,10,.6)';
+    g.fillRect(rnd() * s, rnd() * s, 1 + rnd() * 2, 1 + rnd() * 2);
+  }
+}, 3);
+// Balkonwand: weiss lasierte Bretter mit naturfarbenen Latten
+const slatTex = canvasTex(256, (g, s) => {
+  g.fillStyle = '#eceae4'; g.fillRect(0, 0, s, s);
+  for (let i = 0; i < 4; i++) {
+    g.fillStyle = '#b4834e'; g.fillRect(i * s / 4 + s / 8 - 7, 0, 14, s);
+    g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(i * s / 4 + s / 8 + 7, 0, 3, s);
+  }
+});
+// Balkon: hellgraue Betonplatten 25 x 100 cm im Verband
 const deckTex = canvasTex(256, (g, s) => {
-  g.fillStyle = '#b9b3aa'; g.fillRect(0, 0, s, s);
-  g.strokeStyle = '#9d968c'; g.lineWidth = 2;
-  for (let i = 0; i <= 2; i++) { g.beginPath(); g.moveTo(0, i * s / 2); g.lineTo(s, i * s / 2); g.moveTo(i * s / 2, 0); g.lineTo(i * s / 2, s); g.stroke(); }
+  g.fillStyle = '#d6d4cf'; g.fillRect(0, 0, s, s);
+  for (let i = 0; i < 1500; i++) { g.fillStyle = `rgba(0,0,0,${rnd() * 0.05})`; g.fillRect(rnd() * s, rnd() * s, 2, 2); }
+  g.strokeStyle = '#5f5d59'; g.lineWidth = 2;
+  for (let i = 0; i <= 4; i++) { g.beginPath(); g.moveTo(i * s / 4, 0); g.lineTo(i * s / 4, s); g.stroke(); }
+  for (let i = 0; i < 4; i++) { const off = (i % 2) * s / 2; g.beginPath(); g.moveTo(i * s / 4, off); g.lineTo(i * s / 4 + s / 4, off); g.stroke(); }
 });
 
 const M = (color, opts = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.75, metalness: 0, ...opts });
@@ -526,7 +578,7 @@ const MAT = {
   rattan: M(0x6f6a63, { map: fabricTex, roughness: 0.9 }),
   glass: new THREE.MeshPhysicalMaterial({ color: 0xcfe3ea, transparent: true, opacity: 0.28, roughness: 0.05, transmission: 0, depthWrite: false }),
   screen: M(0x111214, { roughness: 0.25, metalness: 0.2 }),
-  wall: M(0xf3efe8, { roughness: 0.9 }),
+  wall: M(0xf2f2ef, { roughness: 0.95 }),
   wallTop: M(0x48423b, { roughness: 0.9 }),
   kitchenFront: M(0xe8e4dc, { roughness: 0.5 }),
   worktop: M(0x3b3b3b, { roughness: 0.4 }),
@@ -536,10 +588,20 @@ const MAT = {
   frame: M(0x8a8580, { roughness: 0.5 }),
 };
 const floorMat = {
-  parquet: M(0xffffff, { map: parquetTex, roughness: 0.7 }),
+  parquet: M(0xffffff, { map: parquetTex, roughness: 0.55 }),
   tile: M(0xffffff, { map: tileTex, roughness: 0.6 }),
   deck: M(0xffffff, { map: deckTex, roughness: 0.9 }),
 };
+MAT.pine = M(0xffffff, { map: pineTex, roughness: 0.8, side: THREE.DoubleSide });
+MAT.wallTile = M(0xffffff, { map: wallTileTex, roughness: 0.35 });
+MAT.granite = M(0xffffff, { map: graniteTex, roughness: 0.25, metalness: 0.1 });
+MAT.slat = M(0xffffff, { map: slatTex, roughness: 0.8 });
+MAT.backsplash = M(0xd9dbdc, { roughness: 0.08, metalness: 0.1 });
+MAT.led = new THREE.MeshBasicMaterial({ color: 0xfff4dc });
+MAT.handle = M(0xb9bcbf, { roughness: 0.3, metalness: 0.8 });
+MAT.winFrame = M(0xdcdcd8, { roughness: 0.5 });
+MAT.sillStone = M(0xcfccc6, { roughness: 0.5 });
+MAT.entryDoor = M(0x9a9a98, { roughness: 0.5 });
 
 function box(w, h, d, mat, x = 0, y = 0, z = 0) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
@@ -565,8 +627,9 @@ function label(html, cls = '') {
 const building = new THREE.Group(); scene.add(building);
 const wallGroup = new THREE.Group(); scene.add(wallGroup);
 const roomLabels = new THREE.Group(); scene.add(roomLabels);
-const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(8.54, 9.88), M(0xfbfaf7, { side: THREE.DoubleSide }));
-ceiling.rotation.x = Math.PI / 2; ceiling.position.set(4.27, H, 4.94); ceiling.visible = false;
+const ceilMat = MAT.pine.clone(); ceilMat.map = pineTex.clone(); ceilMat.map.needsUpdate = true; ceilMat.map.repeat.set(8.54 / 1.4, 9.88 / 0.9);
+const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(8.54, 9.88), ceilMat);
+ceiling.rotation.x = Math.PI / 2; ceiling.position.set(4.27, H, 4.94); ceiling.visible = false; ceiling.castShadow = true;
 scene.add(ceiling);
 
 const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), M(dark ? 0x2a2723 : 0xe2dcd1, { roughness: 1 }));
@@ -596,56 +659,141 @@ function wallPiece(x0, z0, x1, z1, y0, y1, top = true) {
   m.castShadow = true; m.receiveShadow = true;
   return m;
 }
+const swingGroup = new THREE.Group(); scene.add(swingGroup);
+// Fensterrahmen, Flügelteilung und Fensterbank (Innenseite)
+function windowParts(o, top) {
+  const [x0, z0, x1, z1] = o.r, thinX = x1 - x0 < z1 - z0;
+  const sill = o.sill || 0, head = Math.min(o.head, top), gh = head - sill;
+  if (gh <= 0.05) return;
+  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, len = thinX ? z1 - z0 : x1 - x0, fw = 0.06, fd = 0.07;
+  const along = (a, w, h, d, y) => thinX ? box(d, h, w, MAT.winFrame, cx, y, z0 + a) : box(w, h, d, MAT.winFrame, x0 + a, y, cz);
+  const glass = new THREE.Mesh(thinX ? new THREE.BoxGeometry(0.02, gh, len) : new THREE.BoxGeometry(len, gh, 0.02), MAT.glass);
+  glass.position.set(cx, sill + gh / 2, cz);
+  if (o.kind === 'slide') { glass.position.z = z1 + (z1 - z0) / 2; glass.position.x -= 0.06; } // Schiebeflügel offen geparkt
+  wallGroup.add(glass);
+  if (o.kind === 'slide') { wallGroup.add(along(len / 2, len, 0.02, fd, 0)); return; }
+  wallGroup.add(along(fw / 2, fw, gh, fd, sill), along(len - fw / 2, fw, gh, fd, sill));
+  wallGroup.add(along(len / 2, len, fw, fd, sill), along(len / 2, len, fw, fd, head - fw));
+  for (let i = 1; i < (o.panes || 1); i++) wallGroup.add(along(len * i / o.panes, fw * 1.4, gh, fd, sill));
+  if (sill > 0 && o.inside) { // Fensterbank innen
+    const [ix, iz] = o.inside, depth = thinX ? x1 - x0 : z1 - z0;
+    const fx = thinX ? cx + ix * (depth / 2 + 0.03) : cx, fz = thinX ? cz : cz + iz * (depth / 2 + 0.03);
+    wallGroup.add(thinX ? box(depth / 2 + 0.06, 0.03, len + 0.04, MAT.sillStone, fx - ix * depth / 4, sill - 0.03, fz)
+                        : box(len + 0.04, 0.03, depth / 2 + 0.06, MAT.sillStone, fx, sill - 0.03, fz - iz * depth / 4));
+  }
+}
+// Fronten mit Griffen für Einbauschränke; face = Richtung der Front
+function frontsFor(b, y0, y1, opts) {
+  const [x0, z0, x1, z1] = b.r, [fx, fz] = b.face, alongX = fz !== 0;
+  const len = alongX ? x1 - x0 : z1 - z0, n = Math.max(1, Math.round(len / 0.6)), w = len / n;
+  const fpos = alongX ? (fz > 0 ? z1 : z0) + fz * 0.004 : (fx > 0 ? x1 : x0) + fx * 0.004;
+  for (let i = 0; i < n; i++) {
+    const a = (alongX ? x0 : z0) + w * (i + 0.5);
+    for (const [ya, yb] of opts.rows) {
+      const h = (yb - ya) - 0.006;
+      const panel = alongX ? box(w - 0.006, h, 0.008, MAT.kitchenFront, a, ya + 0.003, fpos) : box(0.008, h, w - 0.006, MAT.kitchenFront, fpos, ya + 0.003, a);
+      wallGroup.add(panel);
+      if (opts.handle) {
+        const vertical = opts.handle === 'v', hy = vertical ? ya + Math.min(1.05, h / 2) : yb - 0.06;
+        const off = vertical ? (i % 2 ? -1 : 1) * (w / 2 - 0.06) : 0;
+        const hw = vertical ? 0.012 : 0.14, hh = vertical ? 0.16 : 0.012;
+        const hp = fpos + (alongX ? fz : fx) * 0.02;
+        wallGroup.add(alongX ? box(hw, hh, 0.02, MAT.handle, a + off, hy, hp) : box(0.02, hh, hw, MAT.handle, hp, hy, a + off));
+      }
+    }
+  }
+}
 function buildWalls(low) {
-  wallGroup.clear();
+  wallGroup.clear(); swingGroup.clear();
   const top = low ? 1.1 : H;
   for (const [x0, z0, x1, z1] of WALLS) wallGroup.add(wallPiece(x0, z0, x1, z1, 0, top));
   for (const o of OPENINGS) {
     const [x0, z0, x1, z1] = o.r;
     if (!low && o.head < H) wallGroup.add(wallPiece(x0, z0, x1, z1, o.head, H));
-    if (o.kind === 'window' || o.kind === 'slide') {
-      const thinX = x1 - x0 < z1 - z0;
-      const gx0 = thinX ? (x0 + x1) / 2 - 0.015 : x0, gx1 = thinX ? (x0 + x1) / 2 + 0.015 : x1;
-      const gz0 = thinX ? z0 : (z0 + z1) / 2 - 0.015, gz1 = thinX ? z1 : (z0 + z1) / 2 + 0.015;
-      const gh = (low ? Math.min(top, o.head) : o.head) - (o.sill || 0);
-      const glass = new THREE.Mesh(new THREE.BoxGeometry(gx1 - gx0, gh, gz1 - gz0), MAT.glass);
-      glass.position.set((gx0 + gx1) / 2, (o.sill || 0) + gh / 2, (gz0 + gz1) / 2);
-      if (o.kind === 'slide') { // Schiebeflügel: ganz offen, vor dem Fixteil geparkt
-        glass.position.z = z1 + (z1 - z0) / 2; glass.position.x -= 0.06;
-      }
-      wallGroup.add(glass);
-      // Rahmen unten/oben
-      wallGroup.add(Object.assign(box(gx1 - gx0 + 0.02, 0.04, gz1 - gz0 + 0.02, MAT.frame, (gx0 + gx1) / 2, 0, (gz0 + gz1) / 2), { castShadow: false }));
-    }
+    if (o.sill) wallGroup.add(wallPiece(x0, z0, x1, z1, 0, Math.min(o.sill, top), low));
+    if (o.kind === 'window' || o.kind === 'slide') windowParts(o, top);
   }
+  // Balkon: schwarzes Staketengeländer, Lattenwand am Nordende
   for (const [x0, z0, x1, z1] of RAILINGS) {
-    wallGroup.add(box(x1 - x0, 0.04, z1 - z0, MAT.railing, (x0 + x1) / 2, 1.0, (z0 + z1) / 2));
-    const g = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.95, z1 - z0), MAT.glass);
-    g.position.set((x0 + x1) / 2, 0.5, (z0 + z1) / 2); wallGroup.add(g);
+    wallGroup.add(box(0.05, 0.04, z1 - z0, MAT.railing, (x0 + x1) / 2, 1.0, (z0 + z1) / 2));
+    for (let z = z0 + 0.06; z < z1; z += 0.12) wallGroup.add(box(0.015, 1.0, 0.015, MAT.railing, (x0 + x1) / 2, 0, z));
   }
+  if (!low) {
+    const sm = MAT.slat.clone(); sm.map = slatTex.clone(); sm.map.needsUpdate = true; sm.map.repeat.set(1.8 / 0.6, 1);
+    wallGroup.add(box(1.80, H, 0.02, sm, 0.98, 0, 1.54));
+  }
+  // Bad: Wandfliesen bis 2.0 m auf den Innenseiten
+  const tileH = Math.min(2.0, top);
+  const tiled = (x0, z0, x1, z1) => {
+    const m = MAT.wallTile.clone(); m.map = wallTileTex.clone(); m.map.needsUpdate = true;
+    m.map.repeat.set(Math.max(x1 - x0, z1 - z0) / 0.6, tileH / 0.6);
+    wallGroup.add(box(x1 - x0, tileH, z1 - z0, m, (x0 + x1) / 2, 0, (z0 + z1) / 2));
+  };
+  tiled(4.27, 5.56, 6.34, 5.566); tiled(4.27, 9.644, 6.34, 9.65); tiled(4.27, 5.56, 4.276, 6.96);
+  tiled(6.334, 5.56, 6.34, 5.66); tiled(6.334, 6.49, 6.34, 9.65); tiled(4.52, 7.03, 4.526, 9.65);
   for (const b of BUILTINS) {
-    const [x0, z0, x1, z1] = b.r, w = x1 - x0, d = z1 - z0;
-    let y1 = b.y1;
+    const [x0, z0, x1, z1] = b.r, w = x1 - x0, d = z1 - z0, cx = x0 + w / 2, cz = z0 + d / 2;
     if (low && b.y0 >= top) continue;
-    if (low) y1 = Math.min(y1, top);
-    const mat = b.kind === 'sanitary' ? MAT.sanitary : b.kind === 'wallLow' ? MAT.wall : MAT.kitchenFront;
-    const m = box(w, y1 - b.y0, d, mat, x0 + w / 2, b.y0, z0 + d / 2);
-    wallGroup.add(m);
-    if (b.kind === 'base') {
-      wallGroup.add(box(w, 0.04, d + 0.02, MAT.worktop, x0 + w / 2, 0.9, z0 + d / 2 + 0.01));
-      wallGroup.add(box(0.5, 0.01, 0.4, MAT.steel, 6.30, 0.94, 0.55));   // Spüle
-      wallGroup.add(box(0.58, 0.01, 0.5, MAT.screen, 7.50, 0.94, 0.55));  // Kochfeld
-    }
-    if (b.kind === 'tall' || b.kind === 'base' || b.kind === 'upper') {
-      const n = Math.max(1, Math.round(w / 0.6));
-      for (let i = 1; i < n; i++) wallGroup.add(box(0.006, y1 - b.y0 - 0.04, 0.005, MAT.frame, x0 + i * w / n, b.y0 + 0.02, z1 + 0.003));
+    const y1 = low ? Math.min(b.y1, top) : b.y1;
+    switch (b.kind) {
+      case 'tall':
+        wallGroup.add(box(w, y1 - b.y0, d, MAT.kitchenFront, cx, b.y0, cz));
+        frontsFor(b, b.y0, y1, { rows: [[0.05, Math.min(y1, 2.0)], ...(y1 > 2.05 ? [[2.0, y1]] : [])], handle: 'v' });
+        break;
+      case 'upper':
+        wallGroup.add(box(w, y1 - b.y0, d, MAT.kitchenFront, cx, b.y0, cz));
+        frontsFor(b, b.y0, y1, { rows: [[b.y0, y1]] });
+        wallGroup.add(box(w - 0.1, 0.012, 0.03, MAT.led, cx, b.y0 - 0.012, z1 - 0.04)); // LED-Leiste
+        break;
+      case 'base':
+        wallGroup.add(box(w, 0.86, d, MAT.kitchenFront, cx, 0.04, cz));
+        wallGroup.add(box(w, 0.04, d - 0.04, MAT.black, cx, 0, cz - 0.02));
+        frontsFor(b, 0.1, 0.9, { rows: [[0.1, 0.68], [0.68, 0.88]], handle: 'h' });
+        wallGroup.add(box(w, 0.04, d + 0.02, MAT.granite, cx, 0.9, cz + 0.01));
+        wallGroup.add(box(w, 0.51, 0.008, MAT.backsplash, cx, 0.94, z0 + 0.004));
+        wallGroup.add(box(0.48, 0.005, 0.38, MAT.steel, 6.30, 0.942, 0.56));   // Spüle
+        wallGroup.add(box(0.03, 0.28, 0.03, MAT.handle, 6.30, 0.94, 0.34));    // Armatur
+        wallGroup.add(box(0.58, 0.006, 0.5, MAT.screen, 7.50, 0.942, 0.56));   // Kochfeld
+        break;
+      case 'washer': {
+        for (const y of [0, 0.85]) {
+          wallGroup.add(box(w, 0.84, d, MAT.sanitary, cx, y, cz));
+          for (const [r, c, dx] of [[0.18, 0xb7babd, 0.01], [0.13, 0x1d1f22, 0.02]]) {
+            const door = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.02, 32), M(c, { roughness: 0.3, metalness: 0.3 }));
+            door.rotation.z = Math.PI / 2; door.position.set(x1 + dx, y + 0.45, cz); wallGroup.add(door);
+          }
+        }
+        wallGroup.add(box(w + 0.02, 0.025, d + 0.1, MAT.kitchenFront, cx, 1.85, cz));
+        break;
+      }
+      case 'wc':
+        wallGroup.add(box(w, y1 - b.y0, d, MAT.sanitary, cx, b.y0, cz));
+        wallGroup.add(box(0.01, 0.15, 0.24, MAT.sanitary, x0 + 0.005, 1.0, cz)); // Drückerplatte
+        break;
+      case 'basin':
+        wallGroup.add(box(w, y1 - b.y0, d, MAT.sanitary, cx, b.y0, cz));
+        wallGroup.add(box(0.03, 0.15, 0.03, MAT.handle, x0 + 0.06, y1, cz));
+        break;
+      case 'mirror': {
+        wallGroup.add(box(w, y1 - b.y0, d, MAT.kitchenFront, cx, b.y0, cz));
+        const mir = box(0.005, y1 - b.y0 - 0.1, d - 0.04, M(0xe4ecef, { roughness: 0.08, metalness: 0.25 }), x1 + 0.003, b.y0 + 0.02, cz);
+        wallGroup.add(mir, box(0.02, 0.02, d - 0.04, MAT.led, x1, y1 - 0.06, cz));
+        break;
+      }
+      case 'wallLow': {
+        const m = MAT.wallTile.clone(); m.map = wallTileTex.clone(); m.map.needsUpdate = true; m.map.repeat.set(Math.max(w, d) / 0.6, (y1 - b.y0) / 0.6);
+        wallGroup.add(box(w, y1 - b.y0, d, m, cx, b.y0, cz));
+        break;
+      }
+      default:
+        wallGroup.add(box(w, y1 - b.y0, d, MAT.kitchenFront, cx, b.y0, cz));
     }
   }
-  // Türen: Flügel offen + Aufschlagbereich
+  // Türen: Flügel offen + Aufschlagbereich (nur in Planansichten)
   for (const dr of DOORS) {
     const [hx, hz] = dr.hinge, [ox, oz] = dr.open;
-    const leaf = box(Math.abs(ox) ? dr.w : 0.04, Math.min(DOOR_H, top) - 0.01, Math.abs(oz) ? dr.w : 0.04, MAT.doorLeaf,
-      hx + ox * dr.w / 2, 0.005, hz + oz * dr.w / 2);
+    const leaf = box(Math.abs(ox) ? dr.w : 0.04, Math.min(DOOR_H, top) - 0.01, Math.abs(oz) ? dr.w : 0.04,
+      dr.name === 'Wohnungstür' ? MAT.entryDoor : MAT.doorLeaf, hx + ox * dr.w / 2, 0.005, hz + oz * dr.w / 2);
     wallGroup.add(leaf);
     const a0 = Math.atan2(dr.closed[1], dr.closed[0]), a1 = Math.atan2(oz, ox);
     let da = a1 - a0; if (da > Math.PI) da -= 2 * Math.PI; if (da < -Math.PI) da += 2 * Math.PI;
@@ -654,8 +802,56 @@ function buildWalls(low) {
     const sg = new THREE.ShapeGeometry(shape);
     sg.rotateX(Math.PI / 2); // Shape (x, y) -> Welt (x, z)
     const sm = new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ color: 0xe0a24a, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
-    sm.position.set(hx, 0.008, hz); wallGroup.add(sm);
+    sm.position.set(hx, 0.008, hz); swingGroup.add(sm);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Deko für Innenansichten: Leuchten (aus der Einkaufsliste), Vorhänge, Teppich, Pflanzen
+// ---------------------------------------------------------------------------
+const decoGroup = new THREE.Group(); scene.add(decoGroup);     // immer sichtbar
+const lampGroup = new THREE.Group(); scene.add(lampGroup);     // nur innen sichtbar
+{
+  const lin = M(0xe3dacb, { map: fabricTex, roughness: 0.95 });
+  const curtain = (x, z, alongZ, w) => { // gerafft: drei Falten
+    for (let i = 0; i < 3; i++) {
+      const off = (i - 1) * w / 3;
+      const f = alongZ ? box(0.05 + (i % 2) * 0.03, 2.38, w / 3 + 0.02, lin, x, 0.04, z + off) : box(w / 3 + 0.02, 2.38, 0.05 + (i % 2) * 0.03, lin, x + off, 0.04, z);
+      decoGroup.add(f);
+    }
+  };
+  curtain(2.40, 1.75, true, 0.42); curtain(2.40, 5.18, true, 0.36);   // Balkonfront
+  curtain(0.47, 6.50, true, 0.34); curtain(0.47, 8.27, true, 0.34);   // Zimmer West
+  curtain(8.06, 2.52, true, 0.34); curtain(8.06, 4.66, true, 0.34);   // Wohnen Ost
+  decoGroup.add(box(0.02, 0.02, 3.6, MAT.steel, 2.40, 2.45, 3.45), box(0.02, 0.02, 2.2, MAT.steel, 0.47, 2.45, 7.38), box(0.02, 0.02, 2.5, MAT.steel, 8.06, 2.45, 3.59));
+  const rug = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.012, 1.6), M(0xe8e1d4, { map: fabricTex, roughness: 1 }));
+  rug.position.set(4.35, 0.006, 4.15); rug.receiveShadow = true; decoGroup.add(rug);
+  const plant = (x, z, s) => {
+    decoGroup.add(cyl(0.16 * s, 0.32 * s, M(0x3a3632, { roughness: 0.6 }), x, 0, z));
+    const leaf = M(0x5d7a46, { roughness: 0.8 });
+    for (let i = 0; i < 7; i++) {
+      const a = i * 0.9, r = 0.1 + rnd() * 0.12;
+      const l = new THREE.Mesh(new THREE.SphereGeometry(0.16 * s, 12, 10), leaf);
+      l.scale.set(1, 1.5, 0.5); l.position.set(x + Math.cos(a) * r * s, (0.55 + rnd() * 0.6) * s, z + Math.sin(a) * r * s);
+      l.rotation.set(rnd(), a, rnd() * 0.6); l.castShadow = true; decoGroup.add(l);
+    }
+  };
+  plant(2.55, 5.15, 1.2); plant(0.32, 1.85, 1.0);
+  // Leuchten: Bambus über dem Couchtisch, SINNERLIG über dem Esstisch, Papier im Zimmer und Eingang
+  const pendant = (x, z, drop, geo, mat, i) => {
+    lampGroup.add(box(0.006, drop, 0.006, MAT.black, x, H - drop, z));
+    const m = new THREE.Mesh(geo, mat); m.position.set(x, H - drop, z); lampGroup.add(m);
+    const l = new THREE.PointLight(0xffdcb0, i, 8, 1.5); l.position.set(x, H - drop - 0.05, z); roomLights.add(l);
+  };
+  const bamboo = M(0xd8b47c, { map: grainTex, roughness: 0.7, emissive: 0x6b4a1c, emissiveIntensity: 0.6 });
+  const paper = M(0xfbf7ee, { emissive: 0xffe6c0, emissiveIntensity: 0.9, roughness: 1 });
+  const sg = new THREE.SphereGeometry(0.33, 28, 18); sg.scale(1, 0.72, 1);
+  pendant(4.35, 4.0, 0.75, sg, bamboo, 7);
+  pendant(7.0, 3.6, 0.95, new THREE.CylinderGeometry(0.1, 0.22, 0.26, 28, 1, true), bamboo, 5);
+  pendant(2.3, 7.3, 0.45, new THREE.SphereGeometry(0.28, 28, 18), paper, 6);
+  pendant(7.3, 6.4, 0.4, new THREE.SphereGeometry(0.2, 24, 16), paper, 3);
+  const bathL = new THREE.PointLight(0xfff2e0, 4, 6, 1.5); bathL.position.set(5.4, 2.35, 7.6); roomLights.add(bathL);
+  const kitL = new THREE.PointLight(0xfff2e0, 3, 4, 1.5); kitL.position.set(6.6, 1.35, 0.6); roomLights.add(kitL);
 }
 
 // ---------------------------------------------------------------------------
@@ -1238,7 +1434,10 @@ function setView(v) {
   state.view = v;
   orbit.enabled = v === 'orbit'; topCtl.enabled = v === 'top';
   ceiling.visible = v === 'ego' || v === 'tour';
-  roomLights.visible = ceiling.visible;
+  roomLights.visible = ceiling.visible; lampGroup.visible = ceiling.visible; swingGroup.visible = !ceiling.visible;
+  // Innen: tiefe Nachmittagssonne von Westen durch Balkon und Fenster; Plan: hohe Sonne
+  if (ceiling.visible) sun.position.set(CENTER.x - 9, 5.2, CENTER.z + 2.5); else sun.position.set(-3, 14, 3);
+  sun.intensity = ceiling.visible ? 2.6 : 1.6;
   $('egohint').style.display = v === 'ego' ? 'block' : 'none';
   $('cross').style.display = v === 'ego' ? 'block' : 'none';
   $('tourbar').style.display = v === 'tour' ? 'block' : 'none';
@@ -1423,7 +1622,7 @@ const TOUR = [
   { t: 69, p: [3.40, 4.95], l: [6.5, 1.40, 5.6] },
   { t: 73, p: [6.10, 4.95], l: [7.2, 1.40, 6.2] },
   { t: 76, p: [7.05, 6.05], l: [5.5, 1.20, 6.3], cap: 'Ins Bad' },
-  { t: 79, p: [5.90, 6.25], l: [5.0, 0.90, 8.2] },
+  { t: 79, p: [5.90, 6.25], l: [4.6, 1.00, 6.9], cap: 'Bad: Waschturm in der Nische, wie in der Musterwohnung' },
   { t: 82, p: [5.85, 6.75], l: [6.1, 0.80, 7.9], stop: true, cap: 'Bad mit Bambusregal gegenüber dem WC' },
   { t: 87, p: [5.85, 6.75], l: [4.9, 0.80, 8.8], stop: true },
 ];
