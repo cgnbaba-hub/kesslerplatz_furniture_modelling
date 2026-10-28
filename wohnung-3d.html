@@ -287,9 +287,11 @@ const CAT = {
   // IKEA
   bissa: { name: 'BISSA Schuhschrank', shop: 'IKEA', price: 29.95, w: 0.49, d: 0.28, h: 0.93, kind: 'cabinet', mat: 'oak', fronts: [1, 1],
     clear: { front: [0.6, 0.7] }, access: 'front', url: IK + 'bissa-schuhschrank-2fach-eichenachbildung-70530218/' },
-  slattum: { name: 'SLATTUM 140 + VESTMARKA', shop: 'IKEA', price: 338.00, w: 1.44, d: 2.06, h: 0.85, kind: 'bed', mat: 'fabricGrey',
-    frameH: 0.30, footH: 0.40, mattress: [1.40, 2.00, 0.18], clear: { sides: [0.6, 0.7], foot: [0.6, 0.7] }, access: 'bed',
-    url: IK + 'slattum-bettgestell-gepolstert-vissle-dunkelgrau-00571245/' },
+  slattum: { name: 'SLATTUM 160 + VESTMARKA', shop: 'IKEA', price: 388.00, w: 1.64, d: 2.06, h: 0.85, kind: 'bed', mat: 'fabricGrey',
+    frameH: 0.30, footH: 0.40, mattress: [1.60, 2.00, 0.18], clear: { sides: [0.6, 0.7], foot: [0.6, 0.7] }, access: 'bed',
+    url: IK + 'slattum-bettgestell-gepolstert-vissle-dunkelgrau-40571248/' },
+  glostadHocker: { name: 'GLOSTAD Hocker', shop: 'IKEA', price: 50.00, w: 0.68, d: 0.58, h: 0.41, kind: 'cabinet', mat: 'fabricGrey', fronts: [],
+    footrest: true, url: IK + 'glostad-hocker-knisa-dunkelgrau-20573286/' },
   kullen: { name: 'KULLEN Nachttisch', shop: 'IKEA', price: 39.95, w: 0.35, d: 0.40, h: 0.49, kind: 'cabinet', mat: 'blackBrown', fronts: [1, 1],
     type: 'nightstand', url: IK + 'kullen-kommode-mit-2-schubladen-schwarzbraun-60322130/' },
   storklinta: { name: 'STORKLINTA Kommode 6 Schubl.', shop: 'IKEA', price: 149.00, w: 1.40, d: 0.50, h: 0.75, kind: 'cabinet', mat: 'white',
@@ -309,9 +311,9 @@ const CAT = {
   // Galaxus
   oklahoma: { name: 'Vasagle Oklahoma Schuhregal', shop: 'Galaxus', price: 36.90, w: 0.75, d: 0.28, h: 0.93, kind: 'rack', mat: 'white', frame: 'steel',
     clear: { front: [0.6, 0.7] }, access: 'front', url: 'https://www.galaxus.ch/de/search?q=Vasagle%20Oklahoma' },
-  legenborn: { name: 'vidaXL Legenborn 140 + Matratze', shop: 'Galaxus', price: 455.01, w: 1.45, d: 2.18, h: 0.745, kind: 'bed', mat: 'fabricDark',
-    frameH: 0.30, footH: 0.30, mattress: [1.40, 2.00, 0.20], clear: { sides: [0.6, 0.7], foot: [0.6, 0.7] }, access: 'bed',
-    url: 'https://www.galaxus.ch/en/s14/product/vidaxl-legenborn-140-x-200-cm-bed-43480100' },
+  legenborn: { name: 'vidaXL Legenborn 160 + Matratze', shop: 'Galaxus', price: 477.01, w: 1.65, d: 2.18, h: 0.745, kind: 'bed', mat: 'fabricDark',
+    frameH: 0.30, footH: 0.30, mattress: [1.60, 2.00, 0.20], clear: { sides: [0.6, 0.7], foot: [0.6, 0.7] }, access: 'bed',
+    url: 'https://www.galaxus.ch/en/s14/product/vidaxl-legenborn-160-x-200-cm-bed-43479803' },
   caleb: { name: 'Skye Decor Caleb Nachttisch', shop: 'Galaxus', price: 26.90, w: 0.25, d: 0.27, h: 0.60, kind: 'cabinet', mat: 'woodLight', fronts: [1],
     legs: 0.12, type: 'nightstand', url: 'https://www.galaxus.ch/de/search?q=Skye%20Decor%20Caleb' },
   ingrid: { name: 'Songmics Ingrid Kommode', shop: 'Galaxus', price: 49.50, w: 0.988, d: 0.30, h: 0.737, kind: 'fabricDrawers', mat: 'fabricBrown', frame: 'steel',
@@ -345,10 +347,11 @@ const DEFAULTS = {
     ...SHARED,
     { id: 'schuh', cat: 'bissa', x: 7.99, z: 5.40, rot: -90 },
     { id: 'bett', cat: 'slattum', x: 2.27, z: 8.62, rot: 180 },
-    { id: 'nacht', cat: 'kullen', x: 1.30, z: 9.45, rot: 180 },
+    { id: 'nacht', cat: 'kullen', x: 1.20, z: 9.45, rot: 180 },
     { id: 'kommode', cat: 'storklinta', x: 1.12, z: 5.80, rot: 0 },
     { id: 'tv', cat: 'kallax', x: 4.55, z: 5.235, rot: 180 },
-    { id: 'couchtisch', cat: 'vitteryd', x: 4.70, z: 3.50, rot: 0 },
+    { id: 'couchtisch', cat: 'vitteryd', x: 4.70, z: 4.00, rot: 0 },
+    { id: 'hocker', cat: 'glostadHocker', x: 4.70, z: 3.27, rot: 0 },
     { id: 'bbank', cat: 'paleseBench', x: 0.77, z: 4.745, rot: 180 },
     { id: 'btisch', cat: 'paleseTable', x: 0.77, z: 3.86, rot: 0 },
     { id: 'bsessel1', cat: 'paleseChair', x: 0.485, z: 3.25, rot: 0 },
@@ -360,7 +363,7 @@ const DEFAULTS = {
     ...SHARED,
     { id: 'schuh', cat: 'oklahoma', x: 7.99, z: 5.40, rot: -90 },
     { id: 'bett', cat: 'legenborn', x: 2.27, z: 8.56, rot: 180 },
-    { id: 'nacht', cat: 'caleb', x: 1.38, z: 9.515, rot: 180 },
+    { id: 'nacht', cat: 'caleb', x: 1.29, z: 9.515, rot: 180 },
     { id: 'kommode', cat: 'ingrid', x: 4.00, z: 7.00, rot: -90 },
     { id: 'tv', cat: 'bianca', x: 4.55, z: 5.23, rot: 180 },
     { id: 'couchtisch', cat: 'vasagleRound', x: 4.70, z: 3.60, rot: 0 },
@@ -375,7 +378,7 @@ const DEFAULTS = {
 // ---------------------------------------------------------------------------
 // Zustand (localStorage nur als Komfort)
 // ---------------------------------------------------------------------------
-const STORE = 'kesslerplatz-3d-v3';
+const STORE = 'kesslerplatz-3d-v4';
 let saved = {};
 try { saved = JSON.parse(localStorage.getItem(STORE)) || {}; } catch (e) { saved = {}; }
 const state = {
@@ -850,7 +853,7 @@ const lampGroup = new THREE.Group(); scene.add(lampGroup);     // nur innen sich
   const bamboo = M(0xd8b47c, { map: grainTex, roughness: 0.7, emissive: 0x6b4a1c, emissiveIntensity: 0.6 });
   const paper = M(0xfbf7ee, { emissive: 0xffe6c0, emissiveIntensity: 0.9, roughness: 1 });
   const sg = new THREE.SphereGeometry(0.33, 28, 18); sg.scale(1, 0.72, 1);
-  pendant(4.70, 3.50, 0.75, sg, bamboo, 7);
+  pendant(4.70, 3.70, 0.75, sg, bamboo, 7);
   pendant(7.0, 3.6, 0.95, new THREE.CylinderGeometry(0.1, 0.22, 0.26, 28, 1, true), bamboo, 5);
   pendant(2.3, 7.3, 0.45, new THREE.SphereGeometry(0.28, 28, 18), paper, 6);
   pendant(7.3, 6.4, 0.4, new THREE.SphereGeometry(0.2, 24, 16), paper, 3);
@@ -1280,7 +1283,9 @@ function evaluate(withPaths = true) {
       if (side === 'left') return obbPoly(s.x, s.z, 0, 0, s.rot, -c.w / 2 - d, lx0, -c.w / 2, lx1);
       return obbPoly(s.x, s.z, 0, 0, s.rot, c.w / 2, lx0, c.w / 2 + d, lx1);
     };
-    const depth = freeDepth(fn, new Set([it.id]));
+    const skip = new Set([it.id]);
+    if (c.kind.startsWith('sofa')) activeItems().forEach(o => { if (o.c.footrest) skip.add(o.id); });
+    const depth = freeDepth(fn, skip);
     const sev = depth < rule[0] ? 'red' : depth < rule[1] ? 'amber' : 'ok';
     strips.push({ poly: fn(Math.min(depth, rule[1])), depth, sev, it, name, rule });
     if (name === 'Seite') { // Himmelsrichtung der Seite angeben
